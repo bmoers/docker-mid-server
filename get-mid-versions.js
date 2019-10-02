@@ -1,0 +1,138 @@
+
+
+const request = require('request-promise');
+const Promise = require('bluebird');
+const fs = require('fs-extra');
+
+const cities = ['newyork', 'madrid', 'london', 'jakarta'];
+
+Promise.mapSeries(cities, (city) => {
+    return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
+        const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/${city}-release-notes\/page\/release-notes\/[^\/]+\/[^-]+-patch[^\.]+\.html)`, 'gm');
+        let m;
+        const patchUrls = [];
+        while ((m = regex.exec(html)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === regex.lastIndex) {
+                regex.lastIndex++;
+            }
+            patchUrls.push(m[1])
+        }
+        return patchUrls;
+    }).then((patchUrls) => {
+        return Promise.mapSeries(patchUrls, (url) => {
+            console.log('getting mid version info from ', url);
+            return request(url).then((html) => {
+                let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
+                let m = html.match(regex);
+                const out = {
+                    tag: undefined,
+                    date: undefined
+                };
+                if (m) {
+                    out.tag = m[1];
+                }
+                regex = />Build date:\s+([^<]+)</i
+                m = html.match(regex);
+                if (m) {
+                    out.date = m[1];
+                }
+                return out;
+            })
+        })
+    }).then((builds) => {
+        return builds.map((build) => {
+            if (build.date) {
+                const dateArray = build.date.split(/[_-]/);
+                if (dateArray.length == 4) {
+                    build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.tag}_${build.date}.linux.x86-64.zip`
+                    build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
+                } else {
+                    console.warn("patch does not match", build)
+                }
+            }
+            return build;
+        });
+    }).then((builds) => {
+        //console.log(patches);
+        return {
+            city,
+            builds: builds
+        };
+    });
+}).then((m) => {
+    return m.reduce((out, row) => {
+        out[row.city] = row.builds.filter((p) => p.id);
+        return out;
+    }, {});
+}).then((m) => {
+    /*
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    
+    */
+    console.dir(m, { depth: null, colors: true });
+    return Promise.map(Object.keys(m), (version, vi) => {
+        const builds = m[version];
+        return Promise.map(builds, (build, bi) => {
+            console.log(`${version}/${build.id}`)
+            const dir = `${version}/${build.id}`;
+            return fs.ensureDir(dir).then(() => {
+                const file = `
+FROM ubuntu:14.04
+
+MAINTAINER Tools Management <tools_management@proservia.fr>
+
+# To get rid of error messages like "debconf: unable to initialize frontend: Dialog":
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
+ADD asset/* /opt/
+
+RUN apt-get -q update && apt-get install -qy unzip \
+    supervisor \
+    wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
+
+RUN wget --no-check-certificate \
+      ${build.url} \
+      -O /tmp/mid.zip && \
+    unzip -d /opt /tmp/mid.zip && \
+    mv /opt/agent/config.xml /opt/ && \
+    chmod 755 /opt/init && \
+    rm -rf /tmp/*
+
+EXPOSE 80 443
+
+ENTRYPOINT ["/opt/init"]
+
+CMD ["mid:start"]
+                `
+                const tags = [`mid-server:${version}-${build.date}`, `mid-server:${build.date}`];
+                if (vi == 0 && bi == 0)
+                    tags.push('mid-server:latest')
+                if (bi == 0)
+                    tags.push(`mid-server:${version}`)
+
+                exe`docker build -f ${dir}/dockerfile ${tags.map((t) => ` --tag ${t}`)} ${dir}/.`
+                tags.forEach((t => {
+                    `docker push ${t}`
+                }));
+
+            })
+
+
+                /*
+    
+                --tag  --tag 
+                
+    
+                    - docker build -f ./app/dockerfile --tag registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA --tag registry.gitlab.com/bmoers/erm4sn-v3:latest .
+                    - docker push registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA
+                    - docker push registry.gitlab.com/bmoers/erm4sn-v3:latest
+                */
+                ;
+        })
+    });
+});
+
