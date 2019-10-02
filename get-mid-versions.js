@@ -4,7 +4,7 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const fs = require('fs-extra');
 
-const cities = ['newyork', 'madrid', 'london', 'jakarta'];
+const cities = ['newyork']//;, 'madrid', 'london', 'jakarta'];
 
 Promise.mapSeries(cities, (city) => {
     return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
@@ -55,10 +55,16 @@ Promise.mapSeries(cities, (city) => {
         });
     }).then((builds) => {
         //console.log(patches);
-        return {
-            city,
-            builds: builds
-        };
+        return Promise.filter(builds, (build) => {
+            console.log('check if zip file exists', build.url)
+            return request({ method: 'HEAD', url: build.url }).then(() => true).catch((e) => false);
+        }).then((builds) => {
+            return {
+                city,
+                builds: builds
+            };
+        })
+
     });
 }).then((m) => {
     return m.reduce((out, row) => {
@@ -77,9 +83,9 @@ Promise.mapSeries(cities, (city) => {
             console.log(`${version}/${build.id}`)
             const dir = `${version}/${build.id}`;
             return fs.ensureDir(dir).then(() => {
-                const file = `
+                /*
+                const file = ``;
 
-                `
                 const tags = [`mid-server:${version}-${build.date}`, `mid-server:${build.date}`];
                 if (vi == 0 && bi == 0)
                     tags.push('mid-server:latest')
@@ -90,7 +96,7 @@ Promise.mapSeries(cities, (city) => {
                 tags.forEach((t => {
                     `docker push ${t}`
                 }));
-
+                */
             })
 
 
