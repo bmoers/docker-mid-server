@@ -4,7 +4,7 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const fs = require('fs-extra');
 
-const cities = ['newyork']//;, 'madrid', 'london', 'jakarta'];
+const cities = ['newyork', 'madrid', 'london']//;, 'madrid', 'london', 'jakarta'];
 
 Promise.mapSeries(cities, (city) => {
     return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
@@ -45,7 +45,8 @@ Promise.mapSeries(cities, (city) => {
             if (build.date) {
                 const dateArray = build.date.split(/[_-]/);
                 if (dateArray.length == 4) {
-                    build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.tag}_${build.date}.linux.x86-64.zip`
+                    build.version = `${build.tag}_${build.date}`;
+                    build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
                     build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
                 } else {
                     console.warn("patch does not match", build)
@@ -77,6 +78,9 @@ Promise.mapSeries(cities, (city) => {
     
     */
     console.dir(m, { depth: null, colors: true });
+    return fs.writeJson('./mid-server-versions.json', m, { spaces: "\t" });
+
+
     return Promise.map(Object.keys(m), (version, vi) => {
         const builds = m[version];
         return Promise.map(builds, (build, bi) => {

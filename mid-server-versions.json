@@ -1,0 +1,351 @@
+{
+	"newyork": [
+		{
+			"tag": "newyork-06-26-2019__patch2-09-18-2019",
+			"date": "09-24-2019_1701",
+			"version": "newyork-06-26-2019__patch2-09-18-2019_09-24-2019_1701",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/24/mid.newyork-06-26-2019__patch2-09-18-2019_09-24-2019_1701.linux.x86-64.zip",
+			"id": "201909241701"
+		},
+		{
+			"tag": "newyork-06-26-2019__patch1-hotfix1-09-04-2019",
+			"date": "09-05-2019_1536",
+			"version": "newyork-06-26-2019__patch1-hotfix1-09-04-2019_09-05-2019_1536",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/05/mid.newyork-06-26-2019__patch1-hotfix1-09-04-2019_09-05-2019_1536.linux.x86-64.zip",
+			"id": "201909051536"
+		},
+		{
+			"tag": "newyork-06-26-2019__patch1-08-14-2019",
+			"date": "08-24-2019_0944",
+			"version": "newyork-06-26-2019__patch1-08-14-2019_08-24-2019_0944",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/08/24/mid.newyork-06-26-2019__patch1-08-14-2019_08-24-2019_0944.linux.x86-64.zip",
+			"id": "201908240944"
+		}
+	],
+	"madrid": [
+		{
+			"tag": "madrid-12-18-2018__patch7-08-21-2019",
+			"date": "09-06-2019_0925",
+			"version": "madrid-12-18-2018__patch7-08-21-2019_09-06-2019_0925",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/06/mid.madrid-12-18-2018__patch7-08-21-2019_09-06-2019_0925.linux.x86-64.zip",
+			"id": "201909060925"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch6-hotfix1-08-12-2019",
+			"date": "08-13-2019_2142",
+			"version": "madrid-12-18-2018__patch6-hotfix1-08-12-2019_08-13-2019_2142",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/08/13/mid.madrid-12-18-2018__patch6-hotfix1-08-12-2019_08-13-2019_2142.linux.x86-64.zip",
+			"id": "201908132142"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch6-07-24-2019",
+			"date": "07-29-2019_1528",
+			"version": "madrid-12-18-2018__patch6-07-24-2019_07-29-2019_1528",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/07/29/mid.madrid-12-18-2018__patch6-07-24-2019_07-29-2019_1528.linux.x86-64.zip",
+			"id": "201907291528"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch5-06-26-2019",
+			"date": "07-01-2019_1425",
+			"version": "madrid-12-18-2018__patch5-06-26-2019_07-01-2019_1425",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/07/01/mid.madrid-12-18-2018__patch5-06-26-2019_07-01-2019_1425.linux.x86-64.zip",
+			"id": "201907011425"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch4b-hotfix1-09-03-2019",
+			"date": "09-03-2019_2241",
+			"version": "madrid-12-18-2018__patch4b-hotfix1-09-03-2019_09-03-2019_2241",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/03/mid.madrid-12-18-2018__patch4b-hotfix1-09-03-2019_09-03-2019_2241.linux.x86-64.zip",
+			"id": "201909032241"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch4-hotfix1-07-01-2019",
+			"date": "07-18-2019_1550",
+			"version": "madrid-12-18-2018__patch4-hotfix1-07-01-2019_07-18-2019_1550",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/07/18/mid.madrid-12-18-2018__patch4-hotfix1-07-01-2019_07-18-2019_1550.linux.x86-64.zip",
+			"id": "201907181550"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch4-05-29-2019",
+			"date": "06-05-2019_1042",
+			"version": "madrid-12-18-2018__patch4-05-29-2019_06-05-2019_1042",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/05/mid.madrid-12-18-2018__patch4-05-29-2019_06-05-2019_1042.linux.x86-64.zip",
+			"id": "201906051042"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch3-hotfix2-05-17-2019",
+			"date": "05-19-2019_1906",
+			"version": "madrid-12-18-2018__patch3-hotfix2-05-17-2019_05-19-2019_1906",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/05/19/mid.madrid-12-18-2018__patch3-hotfix2-05-17-2019_05-19-2019_1906.linux.x86-64.zip",
+			"id": "201905191906"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch3-hotfix1-05-09-2019",
+			"date": "05-10-2019_1311",
+			"version": "madrid-12-18-2018__patch3-hotfix1-05-09-2019_05-10-2019_1311",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/05/10/mid.madrid-12-18-2018__patch3-hotfix1-05-09-2019_05-10-2019_1311.linux.x86-64.zip",
+			"id": "201905101311"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch3-04-24-2019",
+			"date": "05-03-2019_1443",
+			"version": "madrid-12-18-2018__patch3-04-24-2019_05-03-2019_1443",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/05/03/mid.madrid-12-18-2018__patch3-04-24-2019_05-03-2019_1443.linux.x86-64.zip",
+			"id": "201905031443"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch2-03-20-2019",
+			"date": "03-29-2019_1650",
+			"version": "madrid-12-18-2018__patch2-03-20-2019_03-29-2019_1650",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/03/29/mid.madrid-12-18-2018__patch2-03-20-2019_03-29-2019_1650.linux.x86-64.zip",
+			"id": "201903291650"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch1-hotfix2-03-14-2019",
+			"date": "03-20-2019_1304",
+			"version": "madrid-12-18-2018__patch1-hotfix2-03-14-2019_03-20-2019_1304",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/03/20/mid.madrid-12-18-2018__patch1-hotfix2-03-14-2019_03-20-2019_1304.linux.x86-64.zip",
+			"id": "201903201304"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch1-hotfix1-03-08-2019",
+			"date": "03-09-2019_1830",
+			"version": "madrid-12-18-2018__patch1-hotfix1-03-08-2019_03-09-2019_1830",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/03/09/mid.madrid-12-18-2018__patch1-hotfix1-03-08-2019_03-09-2019_1830.linux.x86-64.zip",
+			"id": "201903091830"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch1-02-13-2019",
+			"date": "02-25-2019_1807",
+			"version": "madrid-12-18-2018__patch1-02-13-2019_02-25-2019_1807",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/02/25/mid.madrid-12-18-2018__patch1-02-13-2019_02-25-2019_1807.linux.x86-64.zip",
+			"id": "201902251807"
+		},
+		{
+			"tag": "madrid-12-18-2018__patch0-hotfix1-01-31-2019",
+			"date": "01-31-2019_2112",
+			"version": "madrid-12-18-2018__patch0-hotfix1-01-31-2019_01-31-2019_2112",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/31/mid.madrid-12-18-2018__patch0-hotfix1-01-31-2019_01-31-2019_2112.linux.x86-64.zip",
+			"id": "201901312112"
+		}
+	],
+	"london": [
+		{
+			"tag": "london-06-27-2018__patch10-08-28-2019",
+			"date": "09-06-2019_0928",
+			"version": "london-06-27-2018__patch10-08-28-2019_09-06-2019_0928",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/06/mid.london-06-27-2018__patch10-08-28-2019_09-06-2019_0928.linux.x86-64.zip",
+			"id": "201909060928"
+		},
+		{
+			"tag": "london-06-27-2018__patch9-hotfix1-07-09-2019",
+			"date": "07-10-2019_1645",
+			"version": "london-06-27-2018__patch9-hotfix1-07-09-2019_07-10-2019_1645",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/07/10/mid.london-06-27-2018__patch9-hotfix1-07-09-2019_07-10-2019_1645.linux.x86-64.zip",
+			"id": "201907101645"
+		},
+		{
+			"tag": "london-06-27-2018__patch9-06-19-2019",
+			"date": "06-19-2019_1017",
+			"version": "london-06-27-2018__patch9-06-19-2019_06-19-2019_1017",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/19/mid.london-06-27-2018__patch9-06-19-2019_06-19-2019_1017.linux.x86-64.zip",
+			"id": "201906191017"
+		},
+		{
+			"tag": "london-06-27-2018__patch8-hotfix4-07-16-2019",
+			"date": "07-18-2019_1357",
+			"version": "london-06-27-2018__patch8-hotfix4-07-16-2019_07-18-2019_1357",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/07/18/mid.london-06-27-2018__patch8-hotfix4-07-16-2019_07-18-2019_1357.linux.x86-64.zip",
+			"id": "201907181357"
+		},
+		{
+			"tag": "london-06-27-2018__patch8-hotfix3-06-21-2019",
+			"date": "06-28-2019_1200",
+			"version": "london-06-27-2018__patch8-hotfix3-06-21-2019_06-28-2019_1200",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/28/mid.london-06-27-2018__patch8-hotfix3-06-21-2019_06-28-2019_1200.linux.x86-64.zip",
+			"id": "201906281200"
+		},
+		{
+			"tag": "london-06-27-2018__patch8-04-17-2019",
+			"date": "04-17-2019_1026",
+			"version": "london-06-27-2018__patch8-04-17-2019_04-17-2019_1026",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/04/17/mid.london-06-27-2018__patch8-04-17-2019_04-17-2019_1026.linux.x86-64.zip",
+			"id": "201904171026"
+		},
+		{
+			"tag": "london-06-27-2018__patch7-hotfix2-04-29-2019",
+			"date": "04-30-2019_1150",
+			"version": "london-06-27-2018__patch7-hotfix2-04-29-2019_04-30-2019_1150",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/04/30/mid.london-06-27-2018__patch7-hotfix2-04-29-2019_04-30-2019_1150.linux.x86-64.zip",
+			"id": "201904301150"
+		},
+		{
+			"tag": "london-06-27-2018__patch7-hotfix1-04-04-2019",
+			"date": "04-10-2019_1146",
+			"version": "london-06-27-2018__patch7-hotfix1-04-04-2019_04-10-2019_1146",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/04/10/mid.london-06-27-2018__patch7-hotfix1-04-04-2019_04-10-2019_1146.linux.x86-64.zip",
+			"id": "201904101146"
+		},
+		{
+			"tag": "london-06-27-2018__patch7-03-13-2019",
+			"date": "04-02-2019_1803",
+			"version": "london-06-27-2018__patch7-03-13-2019_04-02-2019_1803",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/04/02/mid.london-06-27-2018__patch7-03-13-2019_04-02-2019_1803.linux.x86-64.zip",
+			"id": "201904021803"
+		},
+		{
+			"tag": "london-06-27-2018__patch6b-hotfix1-06-20-2019",
+			"date": "06-28-2019_1029",
+			"version": "london-06-27-2018__patch6b-hotfix1-06-20-2019_06-28-2019_1029",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/28/mid.london-06-27-2018__patch6b-hotfix1-06-20-2019_06-28-2019_1029.linux.x86-64.zip",
+			"id": "201906281029"
+		},
+		{
+			"tag": "london-06-27-2018__patch6a-hotfix1-05-03-2019",
+			"date": "05-03-2019_1632",
+			"version": "london-06-27-2018__patch6a-hotfix1-05-03-2019_05-03-2019_1632",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/05/03/mid.london-06-27-2018__patch6a-hotfix1-05-03-2019_05-03-2019_1632.linux.x86-64.zip",
+			"id": "201905031632"
+		},
+		{
+			"tag": "london-06-27-2018__patch6-hotfix1-02-27-2019",
+			"date": "03-05-2019_1019",
+			"version": "london-06-27-2018__patch6-hotfix1-02-27-2019_03-05-2019_1019",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/03/05/mid.london-06-27-2018__patch6-hotfix1-02-27-2019_03-05-2019_1019.linux.x86-64.zip",
+			"id": "201903051019"
+		},
+		{
+			"tag": "london-06-27-2018__patch6-02-06-2019",
+			"date": "02-14-2019_1004",
+			"version": "london-06-27-2018__patch6-02-06-2019_02-14-2019_1004",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/02/14/mid.london-06-27-2018__patch6-02-06-2019_02-14-2019_1004.linux.x86-64.zip",
+			"id": "201902141004"
+		},
+		{
+			"tag": "london-06-27-2018__patch5-hotfix1-01-29-2019",
+			"date": "01-30-2019_0712",
+			"version": "london-06-27-2018__patch5-hotfix1-01-29-2019_01-30-2019_0712",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/30/mid.london-06-27-2018__patch5-hotfix1-01-29-2019_01-30-2019_0712.linux.x86-64.zip",
+			"id": "201901300712"
+		},
+		{
+			"tag": "london-06-27-2018__patch5-01-03-2019",
+			"date": "01-18-2019_0328",
+			"version": "london-06-27-2018__patch5-01-03-2019_01-18-2019_0328",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/18/mid.london-06-27-2018__patch5-01-03-2019_01-18-2019_0328.linux.x86-64.zip",
+			"id": "201901180328"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix6-02-13-2019",
+			"date": "02-15-2019_0800",
+			"version": "london-06-27-2018__patch4-hotfix6-02-13-2019_02-15-2019_0800",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/02/15/mid.london-06-27-2018__patch4-hotfix6-02-13-2019_02-15-2019_0800.linux.x86-64.zip",
+			"id": "201902150800"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix5-02-08-2019",
+			"date": "02-13-2019_1836",
+			"version": "london-06-27-2018__patch4-hotfix5-02-08-2019_02-13-2019_1836",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/02/13/mid.london-06-27-2018__patch4-hotfix5-02-08-2019_02-13-2019_1836.linux.x86-64.zip",
+			"id": "201902131836"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix4-01-17-2019",
+			"date": "01-21-2019_2013",
+			"version": "london-06-27-2018__patch4-hotfix4-01-17-2019_01-21-2019_2013",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/21/mid.london-06-27-2018__patch4-hotfix4-01-17-2019_01-21-2019_2013.linux.x86-64.zip",
+			"id": "201901212013"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix3-01-10-2019",
+			"date": "01-11-2019_1112",
+			"version": "london-06-27-2018__patch4-hotfix3-01-10-2019_01-11-2019_1112",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/11/mid.london-06-27-2018__patch4-hotfix3-01-10-2019_01-11-2019_1112.linux.x86-64.zip",
+			"id": "201901111112"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix2-12-20-2018",
+			"date": "12-20-2018_1717",
+			"version": "london-06-27-2018__patch4-hotfix2-12-20-2018_12-20-2018_1717",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/12/20/mid.london-06-27-2018__patch4-hotfix2-12-20-2018_12-20-2018_1717.linux.x86-64.zip",
+			"id": "201812201717"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-hotfix1-12-11-2018",
+			"date": "12-19-2018_1055",
+			"version": "london-06-27-2018__patch4-hotfix1-12-11-2018_12-19-2018_1055",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/12/19/mid.london-06-27-2018__patch4-hotfix1-12-11-2018_12-19-2018_1055.linux.x86-64.zip",
+			"id": "201812191055"
+		},
+		{
+			"tag": "london-06-27-2018__patch4-11-21-2018",
+			"date": "12-04-2018_1527",
+			"version": "london-06-27-2018__patch4-11-21-2018_12-04-2018_1527",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/12/04/mid.london-06-27-2018__patch4-11-21-2018_12-04-2018_1527.linux.x86-64.zip",
+			"id": "201812041527"
+		},
+		{
+			"tag": "london-06-27-2018__patch3-hotfix4-01-03-2019",
+			"date": "01-04-2019_1321",
+			"version": "london-06-27-2018__patch3-hotfix4-01-03-2019_01-04-2019_1321",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2019/01/04/mid.london-06-27-2018__patch3-hotfix4-01-03-2019_01-04-2019_1321.linux.x86-64.zip",
+			"id": "201901041321"
+		},
+		{
+			"tag": "london-06-27-2018__patch3-hotfix3-12-03-2018",
+			"date": "12-07-2018_1154",
+			"version": "london-06-27-2018__patch3-hotfix3-12-03-2018_12-07-2018_1154",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/12/07/mid.london-06-27-2018__patch3-hotfix3-12-03-2018_12-07-2018_1154.linux.x86-64.zip",
+			"id": "201812071154"
+		},
+		{
+			"tag": "london-06-27-2018__patch3-10-24-2018",
+			"date": "11-11-2018_0542",
+			"version": "london-06-27-2018__patch3-10-24-2018_11-11-2018_0542",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/11/11/mid.london-06-27-2018__patch3-10-24-2018_11-11-2018_0542.linux.x86-64.zip",
+			"id": "201811110542"
+		},
+		{
+			"tag": "london-06-27-2018__patch2-hotfix4-11-02-2018",
+			"date": "11-02-2018_1503",
+			"version": "london-06-27-2018__patch2-hotfix4-11-02-2018_11-02-2018_1503",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/11/02/mid.london-06-27-2018__patch2-hotfix4-11-02-2018_11-02-2018_1503.linux.x86-64.zip",
+			"id": "201811021503"
+		},
+		{
+			"tag": "london-06-27-2018__patch2-hotfix2-10-15-2018",
+			"date": "10-18-2018_1315",
+			"version": "london-06-27-2018__patch2-hotfix2-10-15-2018_10-18-2018_1315",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/10/18/mid.london-06-27-2018__patch2-hotfix2-10-15-2018_10-18-2018_1315.linux.x86-64.zip",
+			"id": "201810181315"
+		},
+		{
+			"tag": "london-06-27-2018__patch2-09-19-2018",
+			"date": "09-20-2018_1514",
+			"version": "london-06-27-2018__patch2-09-19-2018_09-20-2018_1514",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/09/20/mid.london-06-27-2018__patch2-09-19-2018_09-20-2018_1514.linux.x86-64.zip",
+			"id": "201809201514"
+		},
+		{
+			"tag": "london-06-27-2018__patch1-hotfix3-09-21-2018",
+			"date": "09-26-2018_2036",
+			"version": "london-06-27-2018__patch1-hotfix3-09-21-2018_09-26-2018_2036",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/09/26/mid.london-06-27-2018__patch1-hotfix3-09-21-2018_09-26-2018_2036.linux.x86-64.zip",
+			"id": "201809262036"
+		},
+		{
+			"tag": "london-06-27-2018__patch1-hotfix2-09-10-2018",
+			"date": "09-11-2018_1115",
+			"version": "london-06-27-2018__patch1-hotfix2-09-10-2018_09-11-2018_1115",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/09/11/mid.london-06-27-2018__patch1-hotfix2-09-10-2018_09-11-2018_1115.linux.x86-64.zip",
+			"id": "201809111115"
+		},
+		{
+			"tag": "london-06-27-2018__patch1-08-15-2018",
+			"date": "08-24-2018_1706",
+			"version": "london-06-27-2018__patch1-08-15-2018_08-24-2018_1706",
+			"url": "https://install.service-now.com/glide/distribution/builds/package/mid/2018/08/24/mid.london-06-27-2018__patch1-08-15-2018_08-24-2018_1706.linux.x86-64.zip",
+			"id": "201808241706"
+		}
+	]
+}

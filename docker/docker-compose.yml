@@ -1,0 +1,21 @@
+version: '2.1'
+
+services:
+  m01:
+    container_name: mid-madrid
+    #hostname: dockerhost01
+    build: .
+    volumes: 
+      ["./logs:/opt/agent/logs"]
+    ports:
+      - "8080:80"
+      - "8081:443"
+    environment: 
+      HOST: dev65672
+      USER_NAME: admin
+      PASSWORD: ***REMOVED***
+      PROXY: 
+      PROXY_PORT: 
+    restart: 
+      always
+    

@@ -1,8 +1,0 @@
-supervisor
-
-    https://advancedweb.hu/2018/07/03/supervisor_docker/
-
-
-https://github.com/moby/moby/issues/5137
-https://serverfault.com/questions/760726/how-to-exit-all-supervisor-processes-if-one-exited-with-0-result/762406#762406
-
