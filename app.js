@@ -4,7 +4,11 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const fs = require('fs-extra');
 
+const { exec, spawn } = require('child-process-async');
+
 const cities = ['newyork', 'madrid', 'london']//;, 'madrid', 'london', 'jakarta'];
+
+const versions = require('./mid-server-versions.json')
 
 Promise.mapSeries(cities, (city) => {
     return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
@@ -48,6 +52,7 @@ Promise.mapSeries(cities, (city) => {
                     build.version = `${build.tag}_${build.date}`;
                     build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
                     build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
+                    build.tagname = build.tag.split('__')[1]
                 } else {
                     console.warn("patch does not match", build)
                 }
@@ -55,7 +60,17 @@ Promise.mapSeries(cities, (city) => {
             return build;
         });
     }).then((builds) => {
-        //console.log(patches);
+
+
+        const existingBuilds = versions[city];
+        if (existingBuilds) {
+            builds = builds.filter((b) => {
+                return !existingBuilds.some((ex) => ex.tag == b.tag)
+            });
+        }
+
+        console.log('newBuilds 1', builds);
+
         return Promise.filter(builds, (build) => {
             console.log('check if zip file exists', build.url)
             return request({ method: 'HEAD', url: build.url }).then(() => true).catch((e) => false);
@@ -72,49 +87,72 @@ Promise.mapSeries(cities, (city) => {
         out[row.city] = row.builds.filter((p) => p.id);
         return out;
     }, {});
-}).then((m) => {
+}).then((newBuilds) => {
     /*
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     
     */
-    console.dir(m, { depth: null, colors: true });
-    return fs.writeJson('./mid-server-versions.json', m, { spaces: "\t" });
+
+    console.log('newBuilds 2', newBuilds);
+
+    Object.keys(newBuilds).forEach((nCity) => {
+
+        if (!versions[nCity]) {
+            versions[nCity] = newBuilds[nCity]
+        } else {
+            versions[nCity] = newBuilds[nCity].concat(versions[nCity])
+        }
+    })
+
+    const vl = Object.keys(versions).length;
+    return Promise.map(Object.keys(versions).reverse(), (city, vi) => {
+        const builds = versions[city];
 
 
-    return Promise.map(Object.keys(m), (version, vi) => {
-        const builds = m[version];
-        return Promise.map(builds, (build, bi) => {
-            console.log(`${version}/${build.id}`)
-            const dir = `${version}/${build.id}`;
-            return fs.ensureDir(dir).then(() => {
-                /*
-                const file = ``;
+        return Promise.map(builds.sort((a, b) => a.id - b.id), (build, bi) => {
+            console.log(`${city}/${build.tagname}`, vi, vl - 1)
+            //const dir = `${city}/${build.tagname}`;
 
-                const tags = [`mid-server:${version}-${build.date}`, `mid-server:${build.date}`];
-                if (vi == 0 && bi == 0)
-                    tags.push('mid-server:latest')
-                if (bi == 0)
-                    tags.push(`mid-server:${version}`)
+            const tags = [`moers/mid-server:${city}.${build.tagname}`, `moers/mid-server:${build.tagname}`];
+            if (vi == vl - 1 && bi == builds.length - 1)
+                tags.push('moers/mid-server:latest')
+            if (bi == builds.length - 1)
+                tags.push(`moers/mid-server:${city}`)
 
-                exe`docker build -f ${dir}/dockerfile ${tags.map((t) => ` --tag ${t}`)} ${dir}/.`
-                tags.forEach((t => {
-                    `docker push ${t}`
-                }));
-                */
-            })
+            console.log(tags);
+            /*
+            exe(`docker build -f ${dir}/Dockerfile ${tags.map((t) => ` --tag ${t}`)} ${dir}/.`)
+
+            exec('docker build -f ./Dockerfile --tag ')
+
+            tags.forEach((t => {
+                exe(`docker push ${t}`)
+            }))
+*/
 
 
-                /*
-    
-                --tag  --tag 
-                
-    
-                    - docker build -f ./app/dockerfile --tag registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA --tag registry.gitlab.com/bmoers/erm4sn-v3:latest .
-                    - docker push registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA
-                    - docker push registry.gitlab.com/bmoers/erm4sn-v3:latest
-                */
-                ;
+
+            /*
+ 
+            --tag  --tag 
+            
+ 
+                - docker build -f ./app/dockerfile --tag registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA --tag registry.gitlab.com/bmoers/erm4sn-v3:latest .
+                - docker push registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA
+                - docker push registry.gitlab.com/bmoers/erm4sn-v3:latest
+            */
+            ;
         })
+    }).then(() => {
+
+
+        //console.dir(newBuilds, { depth: null, colors: true });
+        return fs.writeJson('./mid-server-versions.json', versions, { spaces: "\t" });
     });
+
+
+
+
+
 });
 
