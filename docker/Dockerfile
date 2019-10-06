@@ -1,5 +1,11 @@
 FROM ubuntu:latest
 
+ARG VERSION
+ARG URL
+RUN echo "mid binary url: ${URL}"
+RUN echo "pinned to version: ${VERSION}"
+RUN test -n "$URL"
+
 RUN mkdir -p /opt && \
     groupadd -g 999 mid && \
     useradd -r -u 999 -g mid mid
@@ -9,9 +15,6 @@ RUN apt-get -q update && apt-get install -qy unzip \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
-
-ARG VERSION="london-06-27-2018__patch10-08-28-2019"
-ARG URL="https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/06/mid.london-06-27-2018__patch10-08-28-2019_09-06-2019_0928.linux.x86-64.zip"
 
 ENV HOST "default-host"
 ENV USER_NAME "default-user"
