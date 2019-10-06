@@ -4,12 +4,34 @@ const request = require('request-promise');
 const Promise = require('bluebird');
 const fs = require('fs-extra');
 
-const { exec, spawn } = require('child-process-async');
+const { execAsync } = require('async-child-process');
 
-const cities = ['newyork', 'madrid', 'london']//;, 'madrid', 'london', 'jakarta'];
+
+const cities = ['paris', 'orlando', 'newyork', 'madrid', 'london'];//, 'madrid', 'london']//;, 'madrid', 'london', 'jakarta'];
 
 const versions = require('./mid-server-versions.json')
 
+const dockerBuild = (command, tags, city, build) => {
+    console.log(`Building image: ${city}, version: ${build.version}, tags: ${tags}`);
+    return execAsync(command, { cwd: './docker' }).then(({ stdout, stderr }) => {
+        //console.log(stdout, stderr)
+        console.log("\tbuild done");
+
+        return Promise.each(tags, ((tag) => {
+            command = `docker push ${tag}`;
+            console.log(`push tag ${tag}`)
+            return execAsync(command, { cwd: './docker' }).then(({ stdout, stderr }) => {
+                console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
+                console.log("\ttag done");
+            });
+        }));
+    }).then(() => {
+        return Promise.each(tags, ((tag) => {
+            console.log('remove local image ', tag);
+            return execAsync(`docker rmi ${tag}`, { cwd: './docker' })
+        }));
+    });
+}
 Promise.mapSeries(cities, (city) => {
     return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
         const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/${city}-release-notes\/page\/release-notes\/[^\/]+\/[^-]+-patch[^\.]+\.html)`, 'gm');
@@ -23,6 +45,8 @@ Promise.mapSeries(cities, (city) => {
             patchUrls.push(m[1])
         }
         return patchUrls;
+    }).catch(() => {
+        return [];
     }).then((patchUrls) => {
         return Promise.mapSeries(patchUrls, (url) => {
             console.log('getting mid version info from ', url);
@@ -61,7 +85,6 @@ Promise.mapSeries(cities, (city) => {
         });
     }).then((builds) => {
 
-
         const existingBuilds = versions[city];
         if (existingBuilds) {
             builds = builds.filter((b) => {
@@ -69,11 +92,16 @@ Promise.mapSeries(cities, (city) => {
             });
         }
 
-        console.log('newBuilds 1', builds);
+        console.log('New Builds for', city, builds);
 
-        return Promise.filter(builds, (build) => {
+        return Promise.map(builds, (build) => {
             console.log('check if zip file exists', build.url)
-            return request({ method: 'HEAD', url: build.url }).then(() => true).catch((e) => false);
+            return request({ method: 'HEAD', url: build.url }).then(() => true).catch(() => false).then((found) => {
+                build.zipExits = found;
+                if (!found)
+                    console.log("zip file not found on server for build", build)
+                return build
+            });
         }).then((builds) => {
             return {
                 city,
@@ -82,71 +110,79 @@ Promise.mapSeries(cities, (city) => {
         })
 
     });
-}).then((m) => {
-    return m.reduce((out, row) => {
+}).then((newBuilds) => {
+    // convert to city map
+    return newBuilds.reduce((out, row) => {
+        // remove the ones without an id
         out[row.city] = row.builds.filter((p) => p.id);
         return out;
     }, {});
 }).then((newBuilds) => {
-    /*
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-    
-    */
 
-    console.log('newBuilds 2', newBuilds);
-
+    // merge new builds with existing ones
     Object.keys(newBuilds).forEach((nCity) => {
-
         if (!versions[nCity]) {
             versions[nCity] = newBuilds[nCity]
         } else {
             versions[nCity] = newBuilds[nCity].concat(versions[nCity])
         }
     })
+    return fs.writeJson('./mid-server-versions.json', versions, { spaces: "\t" }).then(() => versions);
 
-    const vl = Object.keys(versions).length;
-    return Promise.map(Object.keys(versions).reverse(), (city, vi) => {
+}).then((versions) => {
+
+    const versionsLen = Object.keys(versions).length;
+
+    console.log('Total number of cities ', versionsLen)
+
+    return Promise.each(Object.keys(versions).sort(), (city, cityIndex) => {
+
+        console.log('City:', city, 'Index:', cityIndex);
+
         const builds = versions[city];
 
+        return Promise.each(builds.sort((a, b) => a.id - b.id), (build, buildIndex) => {
 
-        return Promise.map(builds.sort((a, b) => a.id - b.id), (build, bi) => {
-            console.log(`${city}/${build.tagname}`, vi, vl - 1)
-            //const dir = `${city}/${build.tagname}`;
+            return Promise.try(() => {
 
-            const tags = [`moers/mid-server:${city}.${build.tagname}`, `moers/mid-server:${build.tagname}`];
-            if (vi == vl - 1 && bi == builds.length - 1)
-                tags.push('moers/mid-server:latest')
-            if (bi == builds.length - 1)
-                tags.push(`moers/mid-server:${city}`)
+                if (!build.zipExits) {
+                    console.log("zip does not exist, skip ", build.url);
+                    return;
+                }
 
-            console.log(tags);
-            /*
-            exe(`docker build -f ${dir}/Dockerfile ${tags.map((t) => ` --tag ${t}`)} ${dir}/.`)
+                if (build.done)
+                    return;
 
-            exec('docker build -f ./Dockerfile --tag ')
+                if (buildIndex == builds.length - 1) {
+                    const tags = [`moers/mid-server:${city}.latest`];
+                    if (cityIndex == versionsLen - 1)
+                        tags.push('moers/mid-server:latest')
 
-            tags.forEach((t => {
-                exe(`docker push ${t}`)
-            }))
-*/
+                    return dockerBuild(`docker build -f ./Dockerfile --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} .`, tags, city, build);
+
+                } else {
+
+                    return Promise.try(() => {
+                        const tags = [`moers/mid-server:${city}.${build.tagname}`];
+                        return dockerBuild(`docker build -f ./Dockerfile --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} .`, tags, city, build);
+                    }).then(() => {
+                        const tags = [`moers/mid-server:${city}.pin.${build.tagname}`];
+                        return dockerBuild(`docker build -f ./Dockerfile --build-arg URL=${build.url} --build-arg VERSION=${build.tag} ${tags.map((t) => `--tag ${t}`).join(' ')} .`, tags, city, build);
+                    });
+                }
+            }).then(() => {
+                build.done = true;
+                return fs.writeJson('./mid-server-versions.json', versions, { spaces: "\t" });
+            }).catch((e) => {
+                console.error('somethings wrong', e)
+            })
+
+        });
 
 
 
-            /*
- 
-            --tag  --tag 
-            
- 
-                - docker build -f ./app/dockerfile --tag registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA --tag registry.gitlab.com/bmoers/erm4sn-v3:latest .
-                - docker push registry.gitlab.com/bmoers/erm4sn-v3:$CI_COMMIT_SHA
-                - docker push registry.gitlab.com/bmoers/erm4sn-v3:latest
-            */
-            ;
-        })
     }).then(() => {
-
-
-        //console.dir(newBuilds, { depth: null, colors: true });
+        console.dir(versions, { depth: null, colors: true });
         return fs.writeJson('./mid-server-versions.json', versions, { spaces: "\t" });
     });
 
@@ -154,5 +190,7 @@ Promise.mapSeries(cities, (city) => {
 
 
 
+}).catch((e) => {
+    console.error(e);
 });
 
