@@ -1,6 +1,5 @@
 node_modules
 dev
-docker
 
 docker-compose.yml
 
