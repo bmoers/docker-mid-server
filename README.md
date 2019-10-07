@@ -6,14 +6,14 @@ This is the full collection of all ServiceNow MID Server versions as Docker cont
 
 * latest
 * newyork:
-    * newyork.latest
-    * newyork.first, newyork
+  * newyork.latest
+  * newyork.first, newyork
 * madrid:
-    * madrid.latest
-    * madrid.first, madrid
+  * madrid.latest
+  * madrid.first, madrid
 * london:
-    * london.latest
-    * london.first, london
+  * london.latest
+  * london.first, london
 
 ## Dockerfile
 
