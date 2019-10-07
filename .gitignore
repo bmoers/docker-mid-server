@@ -1,4 +1,5 @@
 node_modules
-gu/
+dev/
 logs/
 .eslintrc.js
+.env

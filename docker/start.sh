@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #set -x
 
-pid=0
-
 #rm -rf /opt/agent/logs/*.*
 #rm -rf /opt/agent/config.xml 
+#sed -i "s|10000000|5|g" /opt/agent/properties/glide.properties
 
 if [[ ! -f /opt/agent/config.xml ]]
 then
@@ -44,10 +43,8 @@ fi
 
 # SIGTERM-handler
 term_handler() {
-    echo "stop mid server"
-    /opt/agent/bin/mid.sh stop &
-    pid="$!"
-    wait $pid
+    echo "DOKER: stop mid server"
+    /opt/agent/bin/mid.sh stop & wait ${!}
     exit 143; # 128 + 15 -- SIGTERM
 }
 
@@ -55,7 +52,10 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 touch /opt/agent/logs/agent0.log.0
 
-echo "start mid server"
+echo "DOKER: start mid server"
 /opt/agent/bin/mid.sh start &
 
-tail -f /opt/agent/logs/agent0.log.0 & wait ${!}
+while true
+do
+  tail -F /opt/agent/logs/agent0.log.0 & wait ${!}
+done

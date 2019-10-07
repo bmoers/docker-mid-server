@@ -1,17 +1,11 @@
 FROM ubuntu:latest
 
-ARG VERSION
-ARG URL
-RUN echo "mid binary url: ${URL}"
-RUN echo "pinned to version: ${VERSION}"
-RUN test -n "$URL"
-
 RUN mkdir -p /opt && \
     groupadd -g 999 mid && \
     useradd -r -u 999 -g mid mid
 
 RUN apt-get -q update && apt-get install -qy unzip \
-    wget && \ 
+    wget vim && \ 
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
@@ -21,7 +15,15 @@ ENV USER_NAME "default-user"
 ENV PASSWORD "default-password"
 ENV PROXY ""
 ENV PROXY_PORT ""
+
+ARG URL
+RUN echo "mid binary url: ${URL}"
+# URL is mandatory
+RUN test -n "$URL"
+
+ARG VERSION
 ENV PIN ${VERSION}
+RUN echo "pinned to version: ${VERSION}"
 
 RUN wget --progress=bar:force --no-check-certificate \
     ${URL} -O /tmp/mid.zip && \
