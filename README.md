@@ -1,6 +1,6 @@
 # ServiceNow MID Server
 
-This is the full collection of all ServiceNow MID Server versions as Docker container.
+This is the full collection of all Service-Now MID Server versions as Docker container.
 
 ## Supported tags
 
