@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "=> Building the binary for $URL"
+docker build --build-arg URL=$URL -f $DOCKERFILE_PATH -t $IMAGE_NAME .
