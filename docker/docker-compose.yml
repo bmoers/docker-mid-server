@@ -1,26 +1,12 @@
-version: '2.1'
+version: '3'
 
 services:
-  m02:
-    container_name: mid-madrid
-    #hostname: dockerhost01
-    build: 
-      dockerfile: ./Dockerfile
-      context: ./
+  mid-server:
+    build:
+      context: .
       args: 
-        URL: https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/28/mid.london-06-27-2018__patch8-hotfix3-06-21-2019_06-28-2019_1200.linux.x86-64.zip
-    volumes: 
-      ["./gu/logs:/opt/agent/logs"]
-    ports:
-      - "8080:80"
-      - "8081:443"
-    
-    environment: 
-      HOST: dev65672
-      USER_NAME: admin
-      PASSWORD: ***REMOVED***
-      PROXY: 
-      PROXY_PORT: 
+        URL: https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/28/mid.london-06-27-2018__patch8-hotfix3-06-21-2019_06-28-2019_1200.linux.x86-64.zip    
+    env_file:
+      - .env
     restart: 
       always
-    

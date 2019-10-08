@@ -4,16 +4,21 @@ This is the full collection of all Service-Now MID Server versions as Docker con
 
 ## Supported tags
 
-* latest
+* latest MID of newest ServiceNow release
+  * `latest`
 * newyork:
-  * newyork.latest
-  * newyork.first, newyork
+  * `newyork.latest`
+  * `newyork.first`, `newyork`
 * madrid:
-  * madrid.latest
-  * madrid.first, madrid
+  * `madrid.latest`
+  * `madrid.first`, `madrid`
 * london:
-  * london.latest
-  * london.first, london
+  * `london.latest`
+  * `london.first`, `london`
+
+> If you need to start a specific version of MID server please have a look at the available [tags](https://hub.docker.com/r/moers/mid-server/tags)
+
+> If you're not sure what version you have, use the city-tag e.g. `moers/mid-server:madrid`. The MID server will auto upgrade to the required version.
 
 ## Dockerfile
 
@@ -28,7 +33,7 @@ $ docker run -d --name docker-mid-london \
   --env HOST=dev12345 \
   --env USER_NAME=username \
   --env PASSWORD=password \
-  moers/mid-server:latest
+  moers/mid-server:madrid
 ```
 
 ## Supported Environment Variables
@@ -50,6 +55,6 @@ To get the latest available MID server for a specific ServiceNow release (city) 
 `:city.latest`
 
 To get an exact MID server which will auto upgrade for a specific ServiceNow release use: \
-`:city.first`
+`:city`
 
 
