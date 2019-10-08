@@ -4,7 +4,7 @@ This is the full collection of all Service-Now MID Server versions as Docker con
 
 ## Supported tags
 
-* latest MID of newest ServiceNow release
+* latest MID of latest ServiceNow release
   * `latest`
 * newyork:
   * `newyork.latest`
@@ -51,10 +51,8 @@ ENV PROXY_PORT "proxy-port [optional]"
 To get the latest available MID server use \
 `:latest`
 
-To get the latest available MID server for a specific ServiceNow release (city)  use: \
+To get the latest available MID server for a specific ServiceNow release (city-tag)  use: \
 `:city.latest`
 
 To get an exact MID server which will auto upgrade for a specific ServiceNow release use: \
 `:city`
-
-
