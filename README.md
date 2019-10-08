@@ -1,3 +1,6 @@
+![Docker Pulls](https://img.shields.io/docker/pulls/moers/mid-server?style=flat-square) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/moers/mid-server?style=flat-square)
+
+
 # ServiceNow MID Server
 
 This is the full collection of all Service-Now MID Server versions as Docker container.
