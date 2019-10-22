@@ -4,6 +4,8 @@ services:
   node:
     build:
       context: .
+    image:
+      build-docker-mid-server:latest
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     env_file:
