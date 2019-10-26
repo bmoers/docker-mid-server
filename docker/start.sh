@@ -43,7 +43,7 @@ fi
 
 # SIGTERM-handler
 term_handler() {
-    echo "DOKER: stop mid server"
+    echo "DOCKER: stop mid server"
     /opt/agent/bin/mid.sh stop & wait ${!}
     exit 143; # 128 + 15 -- SIGTERM
 }
@@ -51,8 +51,8 @@ term_handler() {
 trap 'kill ${!}; term_handler' SIGTERM
 
 touch /opt/agent/logs/agent0.log.0
-
-echo "DOKER: start mid server"
+ 
+echo "DOCKER: start mid server"
 /opt/agent/bin/mid.sh start &
 
 while true
