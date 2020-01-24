@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args: 
-        URL: https://install.service-now.com/glide/distribution/builds/package/mid/2019/06/28/mid.london-06-27-2018__patch8-hotfix3-06-21-2019_06-28-2019_1200.linux.x86-64.zip    
+        URL: https://install.service-now.com/glide/distribution/builds/package/mid/2019/09/06/mid.london-06-27-2018__patch10-08-28-2019_09-06-2019_0928.linux.x86-64.zip
     env_file:
       - .env
     restart: 
