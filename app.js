@@ -15,7 +15,7 @@ const MongoClient = require('mongodb').MongoClient;
 const getCities = () => {
     return new Promise((resolve, reject) => {
         var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
+        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
             dbo.collection("city").find({}).toArray((err, result) => {
@@ -32,7 +32,7 @@ const getCities = () => {
 const getBuilds = () => {
     return new Promise((resolve, reject) => {
         var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
+        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
             dbo.collection("build").find({}).toArray((err, result) => {
@@ -48,7 +48,7 @@ const getBuilds = () => {
 const addBuild = (build) => {
     return new Promise((resolve, reject) => {
         var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
+        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
             dbo.collection("build").insertOne(build, (err, res) => {
@@ -70,7 +70,7 @@ const updateBuild = (build) => {
 
     return new Promise((resolve, reject) => {
         var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true }, (err, db) => {
+        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
             //console.log('UPDATE', build);
@@ -150,7 +150,8 @@ Promise.try(() => {
                 patchUrls.push(m[1])
             }
             return patchUrls;
-        }).catch(() => {
+        }).catch((e) => {
+            console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
             return [];
         }).then((patchUrls) => {
 
@@ -304,7 +305,8 @@ Promise.try(() => {
             //console.dir(versions, { depth: null, colors: true });
         });
 
-
+    }).then(() => {
+        //return Promise.delay(9999999)
     });
 
 }).catch((e) => {
