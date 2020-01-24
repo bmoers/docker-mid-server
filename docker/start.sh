@@ -54,7 +54,7 @@ term_handler() {
 trap 'kill ${!}; term_handler' SIGTERM
 
 touch /opt/agent/logs/agent0.log.0
-
+ 
 echo "DOCKER: start mid server"
 /opt/agent/bin/mid.sh start &
 
