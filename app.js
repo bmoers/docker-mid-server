@@ -119,6 +119,16 @@ const dockerBuild = (command, tags, city, build) => {
 
 Promise.try(() => {
     return getBuilds().then((builds) => {
+        if (process.env.FORCE_REFRESH !== 'true')
+            return builds;
+
+        // force reset build done
+        console.warn('FORCE REFRESH MODE: replacing all images !')
+        return builds.map((build) => {
+            build.done = false;
+            return build;
+        });
+    }).then((builds) => {
         return builds.reduce((out, build) => {
             if (out[build.city]) {
                 out[build.city].push(build);
@@ -156,7 +166,7 @@ Promise.try(() => {
         }).then((patchUrls) => {
 
             return Promise.mapSeries(patchUrls, (url) => {
-                console.log('getting mid version info from ', url);
+                console.log('parsing mid version info from ', url);
                 return request(url).then((html) => {
                     let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
                     let m = html.match(regex);
@@ -244,14 +254,14 @@ Promise.try(() => {
 
     }).then((versions) => {
 
-        console.log("%j", versions)
+        //console.log("%j", versions)
 
         const versionsLen = Object.keys(versions).length;
         console.log('Total number of cities ', versionsLen)
 
         return Promise.each(Object.keys(versions).sort(), (city, cityIndex) => {
 
-            console.log('City:', city, 'Index:', cityIndex);
+            console.log(`City: '${city}' index: ${cityIndex}`);
 
             const builds = versions[city];
             return Promise.each(builds.sort((a, b) => a.id - b.id), (build, buildIndex) => {
