@@ -15,7 +15,7 @@
     "child-process-async": "^1.0.1",
     "dotenv": "^8.1.0",
     "fs-extra": "^8.1.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "mongodb": "^3.3.2",
     "object-assign": "^4.1.1",
     "object-assign-deep": "^0.4.0",
