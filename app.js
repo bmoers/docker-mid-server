@@ -3,7 +3,6 @@
 require('dotenv').config();
 const request = require('request-promise');
 const Promise = require('bluebird');
-const fs = require('fs-extra');
 
 const { execAsync } = require('async-child-process');
 

@@ -5,7 +5,7 @@ spawn('node', ['bgService.js'], {
 */
 const request = require('request-promise');
 const Promise = require('bluebird');
-const uuid = require('uuid/v4')
+const { v4: uuid } = require('uuid');
 const { execAsync } = require('async-child-process');
 
 const { HOST, USER_NAME, PASSWORD, PROXY, PROXY_PORT } = (process.env.HOST) ? process.env : require('minimist')(process.argv.slice(2));
