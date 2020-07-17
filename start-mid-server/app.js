@@ -1,8 +1,4 @@
-/*var spawn = require('child_process').spawn;
-spawn('node', ['bgService.js'], {
-    detached: true
-});
-*/
+
 const request = require('request-promise');
 const Promise = require('bluebird');
 const { v4: uuid } = require('uuid');
@@ -46,7 +42,7 @@ const start = () => {
     }).then((build) => {
 
         if (!build || !build.city)
-            throw Error('No build information found', build)
+            throw Error('No build information found ' + JSON.stringify(build))
 
         const tag = `${build.city}.${build.date}`
 
