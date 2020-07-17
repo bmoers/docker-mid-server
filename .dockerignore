@@ -1,12 +1,7 @@
-node_modules
-dev
+*
 
-docker-compose.yml
+!docker
+!package*.json
+!app.js
 
-.eslintrc.js
-.gitignore
-.env
-
-README.md
-
-
+docker/.env
