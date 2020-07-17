@@ -1,4 +1,4 @@
-![Docker Pulls](https://img.shields.io/docker/pulls/moers/mid-server?style=flat-square) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/moers/mid-server?style=flat-square)
+![Docker Pulls](https://img.shields.io/docker/pulls/moers/mid-server?style=flat-square) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/moers/mid-server?style=flat-square) ![Build New MID Images](https://github.com/bmoers/docker-mid-server/workflows/Build%20New%20MID%20Images/badge.svg)
 
 
 # ServiceNow MID Server
