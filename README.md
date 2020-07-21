@@ -45,6 +45,8 @@ $ docker run -d --name docker-mid-london \
 ENV HOST "the service-now host name"
 ENV USER_NAME "mid user name"
 ENV PASSWORD "mid user password"
+ENV HOSTNAME "the MID server name (suffixed by '-mid.docker') [optional]"
+ENV PIN "disable auto upgrade and pin the mid to this version [optional]"
 ENV PROXY "proxy-host [optional]"
 ENV PROXY_PORT "proxy-port [optional]"
 ```
