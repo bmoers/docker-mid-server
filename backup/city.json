@@ -1,0 +1,7 @@
+{"_id":{"$oid":"5d9bb4f07c213e55613b7cb6"},"name":"london"}
+{"_id":{"$oid":"5d9bb4e27c213e55613b7c9d"},"name":"madrid"}
+{"_id":{"$oid":"5d9bb4d17c213e55613b7c99"},"name":"newyork"}
+{"_id":{"$oid":"5d9bb4c07c213e55613b7c97"},"name":"orlando"}
+{"_id":{"$oid":"5d9bb4897c213e55613b7c71"},"name":"paris"}
+{"_id":{"$oid":"5f1742ece7179a510445d1bc"},"name":"quebec"}
+{"_id":{"$oid":"5f17430fe7179a510445d1c0"},"name":"rome"}
