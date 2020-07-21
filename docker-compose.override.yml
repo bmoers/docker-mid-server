@@ -2,6 +2,4 @@ version: '3'
 
 services:
   refresh:
-    labels: 
-      - "cron.schedule=0 0 */4 * * MON,FRI"
-      #- "cron.schedule=0 */5 * * * MON,FRI"
+    restart: "no"
