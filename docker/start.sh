@@ -10,7 +10,16 @@ then
     
     cp /opt/config.xml /opt/agent/.
     
-    sed -i "s|https://YOUR_INSTANCE.service-now.com|https://${HOST}.service-now.com|g" /opt/agent/config.xml
+    if [[ ! -z "$SN_HOST_NAME" ]]
+    then
+        echo "Configuring Host Name: $SN_HOST_NAME (\$SN_HOST_NAME)"
+        sed -i "s|https://YOUR_INSTANCE.service-now.com|https://${SN_HOST_NAME}|g" /opt/agent/config.xml
+    elif [[ ! -z "$HOST" ]]
+    then
+        echo "Configuring Host Name: ${HOST}.service-now.com (\$HOST)"
+        sed -i "s|https://YOUR_INSTANCE.service-now.com|https://${HOST}.service-now.com|g" /opt/agent/config.xml
+    fi
+    
     sed -i "s|YOUR_INSTANCE_USER_NAME_HERE|${USER_NAME}|g" /opt/agent/config.xml
     sed -i "s|YOUR_INSTANCE_PASSWORD_HERE|${PASSWORD}|g" /opt/agent/config.xml
     sed -i "s|YOUR_MIDSERVER_NAME_GOES_HERE|${HOSTNAME}-mid.docker|g" /opt/agent/config.xml

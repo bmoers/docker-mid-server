@@ -4,12 +4,14 @@ const Promise = require('bluebird');
 const { v4: uuid } = require('uuid');
 const { execAsync } = require('async-child-process');
 
-const { HOST, USER_NAME, PASSWORD, PROXY, PROXY_PORT } = (process.env.HOST) ? process.env : require('minimist')(process.argv.slice(2));
+const { HOST, SN_HOST_NAME, USER_NAME, PASSWORD, PROXY, PROXY_PORT } = (process.env.HOST || process.env.SN_HOST_NAME) ? process.env : require('minimist')(process.argv.slice(2));
+
+const FQDN = (SN_HOST_NAME) ? SN_HOST_NAME : `${HOST}.service-now.com`;
 
 const start = () => {
     return Promise.try(() => {
-        if (!HOST)
-            throw Error('HOST is mandatory');
+        if (!HOST && !SN_HOST_NAME)
+            throw Error('HOST or SN_HOST_NAME is mandatory');
         if (!USER_NAME)
             throw Error('USER_NAME is mandatory');
         if (!PASSWORD)
@@ -17,7 +19,7 @@ const start = () => {
 
     }).then(() => {
 
-        return request(`https://${HOST}.service-now.com/stats.do`, {
+        return request(`https://${FQDN}/stats.do`, {
             auth: {
                 user: USER_NAME,
                 password: PASSWORD
@@ -68,10 +70,11 @@ const start = () => {
         if (!tag)
             throw Error('No docker image found', tag)
 
-        //console.log(tag);
         const name = `mid-${tag}-${uuid().split('-')[0]}`;
-        console.log(`Starting docker container '${name}' for environment '${HOST}'`);
-        const command = `docker run -d --name ${name}  --env HOST=${HOST} --env USER_NAME=${USER_NAME} --env PASSWORD=${PASSWORD} ${(PROXY) ? `--env PROXY=${PROXY}` : ''} ${(PROXY_PORT) ? `--env PROXY_PORT=${PROXY_PORT}` : ''} moers/mid-server:${tag}`;
+
+        console.log(`Starting docker container '${name}' for environment '${FQDN}'`);
+        
+        const command = `docker run -d --name ${name}  --env SN_HOST_NAME=${FQDN} --env USER_NAME=${USER_NAME} --env PASSWORD=${PASSWORD} ${(PROXY) ? `--env PROXY=${PROXY}` : ''} ${(PROXY_PORT) ? `--env PROXY_PORT=${PROXY_PORT}` : ''} moers/mid-server:${tag}`;
         return execAsync(command, { cwd: './' }).then(({ stdout, stderr }) => {
             console.log(stdout);
         })

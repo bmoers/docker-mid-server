@@ -11,6 +11,7 @@ RUN apt-get -q update && apt-get install -qy unzip \
     rm -rf /tmp/*
 
 ENV HOST "default-host"
+ENV SN_HOST_NAME ""
 ENV USER_NAME "default-user"
 ENV PASSWORD "default-password"
 ENV PROXY ""

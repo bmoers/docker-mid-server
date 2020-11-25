@@ -32,8 +32,8 @@ All versions are based on the same [Dockerfile](https://github.com/bmoers/docker
 To use it run:
 
 ```bash
-$ docker run -d --name docker-mid-london \
-  --env HOST=dev12345 \
+$ docker run -d --name docker-mid-madrid \
+  --env SN_HOST_NAME=dev12345.service-now.com \
   --env USER_NAME=username \
   --env PASSWORD=password \
   moers/mid-server:madrid
@@ -42,13 +42,14 @@ $ docker run -d --name docker-mid-london \
 ## Supported Environment Variables
 
 ```bash
-ENV HOST "the service-now host name"
+ENV SN_HOST_NAME "FQDN of the ServiceNow instance (replacement for $HOST)"
 ENV USER_NAME "mid user name"
 ENV PASSWORD "mid user password"
 ENV HOSTNAME "the MID server name (suffixed by '-mid.docker') [optional]"
 ENV PIN "disable auto upgrade and pin the mid to this version [optional]"
 ENV PROXY "proxy-host [optional]"
 ENV PROXY_PORT "proxy-port [optional]"
+ENV HOST "the <host>.service-now.com subdomain [legacy]"
 ```
 
 ## Versions
