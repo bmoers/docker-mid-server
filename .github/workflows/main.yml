@@ -2,9 +2,7 @@ name: Build New MID Images
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [master]
   schedule:
     - cron: "0 20 * * SAT"
 
