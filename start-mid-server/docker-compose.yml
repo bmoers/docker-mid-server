@@ -12,4 +12,5 @@ services:
       PASSWORD: 
       PROXY: 
       PROXY_PORT: 
+      SN_HOST_NAME:
     
