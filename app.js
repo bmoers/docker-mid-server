@@ -94,7 +94,20 @@ const dockerBuild = (command, tags, city, build) => {
     return Promise.try(() => {
         return execAsync(`docker login -u ${process.env.DOCKER_USER_NAME} -p ${process.env.DOCKER_TOKEN}`, { cwd: './docker' })
     }).then(() => {
+        // cleanup to ensure tags are fresh
+        return Promise.each(tags, ((tag) => {
+            console.log('remove local image: ', `docker rmi --force ${tag}`);
+            return execAsync(`docker rmi --force ${tag}`, {
+                cwd: './docker'
+            }).then(({ stdout, stderr }) => {
+                if (stdout.trim()){
+                    console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
+                }
+            });
+        }));
 
+    }).then(() => {
+        //console.log(`dockerBuild: ${command}`);
         return execAsync(command, { cwd: './docker' }).then(({ stdout, stderr }) => {
             //console.log(stdout, stderr)
             console.log("\tbuild done");
@@ -109,9 +122,14 @@ const dockerBuild = (command, tags, city, build) => {
             }));
         });
     }).then(() => {
+        // cleanup as my disk is not endless
         return Promise.each(tags, ((tag) => {
-            console.log('remove local image ', tag);
-            return execAsync(`docker rmi ${tag}`, { cwd: './docker' })
+            console.log('remove local image: ', `docker rmi --force ${tag}`);
+            return execAsync(`docker rmi --force ${tag}`, {
+                cwd: './docker'
+            }).then(({ stdout, stderr }) => {
+                console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
+            });
         }));
     });
 }
@@ -291,7 +309,7 @@ Promise.try(() => {
                             if (cityIndex == versionsLen - 1)
                                 tags.push('moers/mid-server:latest')
                         }
-                        return dockerBuild(`docker build -f ./Dockerfile --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} .`, tags, city, build);
+                        return dockerBuild(`docker build -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
 
                     }).then(() => {
                         //const tags = [`moers/mid-server:${city}.pin.${build.tagname}`, `moers/mid-server:${city}.pin.${build.date}`];
