@@ -47,13 +47,11 @@ RUN /bin/bash -c 'if [[ ! -d "/opt/agent/jre" ]] ; then apt-get update && \
     ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre /opt/agent/. \
     ; fi'
 
+# HEALTHCHECK --interval=15s --retries=6 --timeout=5s --start-period=30s CMD pgrep -af /opt/agent/bin/./wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1 
+
 ADD ./start.sh /opt
 RUN chmod +x /opt/start.sh
 
 USER mid
 
 CMD ["/opt/start.sh"]
-
-
-
-
