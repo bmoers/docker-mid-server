@@ -34,6 +34,7 @@ then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.use_proxy\" value=\"true\"/>\n\n</parameters>|g" /opt/agent/config.xml
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.host\" value=\"${PROXY}\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
+
     if [[ ! -z "$PROXY_PORT" ]]
     then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.port\" value=\"${PROXY_PORT}\"/>\n\n</parameters>|g" /opt/agent/config.xml
@@ -43,10 +44,51 @@ then
     then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.username\" value=\"${PROXY_USER}\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
+
     if [[ ! -z "$PROXY_PASSWORD" ]]
     then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.password\" value=\"${PROXY_PASSWORD}\" encrypt=\"true\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
+else 
+    echo "DOCKER: Update MID Sever status";
+
+    SYS_ID=`grep -oP 'name="mid_sys_id" value="\K[^"]{32}' /opt/agent/config.xml`
+    URL=`grep -oP '<parameter name="url" value="\K[^"]+' /opt/agent/config.xml`
+
+    if [[ -z "$SYS_ID" || -z "$URL" ]]
+    then
+        echo "DOCKER: Update MID Sever status: SYS_ID ($SYS_ID) or URL ($URL) not specified!";
+    else
+        HTTP_PROXY=""
+        if [[ ! -z "$PROXY" ]] 
+        then
+            HTTP_PROXY="$PROXY"
+        fi
+
+        if [[ ! -z "$PROXY_PORT" ]] 
+        then
+            HTTP_PROXY="${HTTP_PROXY}:${PROXY_PORT}"
+        fi
+
+        if [[ ! -z "$PROXY_USER" && ! -z "$PROXY_PASSWORD" ]]
+        then
+            HTTP_PROXY="${PROXY_USER}:${PROXY_PASSWORD}@${HTTP_PROXY}"
+        fi
+
+        if [[ ! -z "$HTTP_PROXY" ]]
+            export http_proxy="http://${HTTP_PROXY}"
+        then
+            unset http_proxy
+        fi
+
+        echo "DOCKER: Update MID Sever status: Set status to DOWN";
+        wget -O- --method=PUT --body-data='{"status":"Down"}' \
+            --header='Content-Type:application/json' \
+            --user "${USER_NAME}" --password "${PASSWORD}"  \
+            "${URL}/api/now/table/ecc_agent/${SYS_ID}?sysparm_fields=status"
+        echo -e ""
+    fi
+
 fi
 
 logmon(){
