@@ -81,6 +81,20 @@ else
             unset http_proxy
         fi
 
+        ## TODO CaCerts
+        #
+        # LIST
+        # ./jre/bin/keytool -keystore jre/lib/security/cacerts -storepass changeit -noprompt --list | grep -i custmoerCa
+        # 
+        # ADD
+        # ./jre/bin/keytool -import -alias custmoerCa -file customerCa.crt -keystore jre/lib/security/cacerts -storepass changeit -noprompt
+        # 
+        # SET
+        # -Djavax.net.ssl.trustStore=/app/security/truststore.jks
+        # -Djavax.net.ssl.trustStorePassword=myTrustStorePassword
+
+        # wget --ca-certificate={the_cert_file_path}  ${URL}
+
         echo "DOCKER: Update MID Sever status: Set status to DOWN";
         wget -O- --method=PUT --body-data='{"status":"Down"}' \
             --header='Content-Type:application/json' \
