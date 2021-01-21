@@ -165,6 +165,9 @@ Promise.try(() => {
     //console.log("%j", cities)
 
     return Promise.mapSeries(cities, (city) => {
+        
+        console.log(`process city ${city}`);
+
         return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
             const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/${city}-release-notes\/page\/release-notes\/[^\/]+\/[^-]+-patch[^\.]+\.html)`, 'gm');
             let m;
@@ -180,47 +183,73 @@ Promise.try(() => {
         }).catch((e) => {
             console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
             return [];
-        }).then((patchUrls) => {
+        }).then(async (patchUrls) => {
+            
+            const builds =  await Promise.mapSeries(patchUrls, async (url) => {
 
-            return Promise.mapSeries(patchUrls, (url) => {
-                console.log('parsing mid version info from ', url);
-                return request(url).then((html) => {
+                console.log('parsing mid version info from', url);
+
+                const out = {
+                    tag: undefined,
+                    date: undefined
+                };
+
+                try {
+                    let html = await request(url);
+                    html = html.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
+
                     let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
                     let m = html.match(regex);
-                    const out = {
-                        tag: undefined,
-                        date: undefined
-                    };
+                    
                     if (m) {
                         out.tag = m[1];
+                    } else {
+                        console.warn('Tag not found')
                     }
                     regex = />Build date:\s+([^<]+)</i
                     m = html.match(regex);
                     if (m) {
                         out.date = m[1];
+                    } else {
+                        console.warn('Date not found')
                     }
-                    return out;
-                })
-            })
+                
+                    if (!out.tag || !out.date) {
+                        console.warn(`Parsing failed! ${url}`);
+                        console.log(out)
+                    }
+
+                } catch (e) {
+                    console.error('Request failed: ', url);
+                }
+
+                return out;
+
+            });
+            
+            return builds.filter((build) => build.tag && build.date);
+
         }).then((builds) => {
-            return builds.map((build) => {
+
+            return builds.map((build, index) => {
 
                 build.city = city;
 
-                if (build.date) {
-                    const dateArray = build.date.split(/[_-]/);
-                    if (dateArray.length == 4) {
-                        build.version = `${build.tag}_${build.date}`;
-                        build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
-                        build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
-                        build.tagname = build.tag.split('__')[1]
-                    } else {
-                        console.warn("patch does not match", build)
-                    }
+                const dateArray = build.date.split(/[_-]/);
+                if (dateArray.length == 4) {
+                    build.version = `${build.tag}_${build.date}`;
+                    build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
+                    build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
+                    build.tagname = build.tag.split('__')[1]
+                } else {
+                    console.warn("patch does not match", build.date)
                 }
                 return build;
             });
+
         }).then((builds) => {
+
+            //console.dir(builds, { depth: null, colors: true });
 
             const existingBuilds = versions[city];
             if (existingBuilds) {
@@ -231,23 +260,28 @@ Promise.try(() => {
 
             console.log('New Builds for', city, builds);
 
-            return Promise.map(builds, (build) => {
+            return Promise.map(builds, async (build) => {
                 console.log('check if zip file exists', build.url)
-                return request({ method: 'HEAD', url: build.url }).then(() => true).catch(() => false).then((found) => {
-                    build.zipExits = found;
-                    if (!found)
-                        console.log("zip file not found on server for build", build)
-                    return build
-                });
-            }).then((builds) => {
+
+                try {
+                    await request({ method: 'HEAD', url: build.url });
+                    build.zipExits = true;
+                } catch (e){
+                    build.zipExits = false;
+                    console.log("zip file not found on server for build", build);
+                }
+                return build;
+
+            }).then((buildsZip) => {
                 return {
                     city,
-                    builds: builds
+                    builds: buildsZip
                 };
             })
 
         });
     }).then((newBuilds) => {
+
         // convert to city map
         return newBuilds.reduce((out, row) => {
             // remove the ones without an id
@@ -269,18 +303,19 @@ Promise.try(() => {
         });
         return versions;
 
-    }).then((versions) => {
+    }).then((buildVersions) => {
 
-        //console.log("%j", versions)
+        //console.dir(buildVersions, { depth: null, colors: true });
+        //process.exit(0)
 
-        const versionsLen = Object.keys(versions).length;
+        const versionsLen = Object.keys(buildVersions).length;
         console.log('Total number of cities ', versionsLen)
 
-        return Promise.each(Object.keys(versions).sort(), (city, cityIndex) => {
+        return Promise.each(Object.keys(buildVersions).sort(), (city, cityIndex) => {
 
             console.log(`City: '${city}' index: ${cityIndex}`);
 
-            const builds = versions[city];
+            const builds = buildVersions[city];
             return Promise.each(builds.sort((a, b) => a.id - b.id), (build, buildIndex) => {
 
                 return Promise.try(() => {
@@ -329,7 +364,7 @@ Promise.try(() => {
 
 
         }).then(() => {
-            //console.dir(versions, { depth: null, colors: true });
+            //console.dir(buildVersions, { depth: null, colors: true });
         });
 
     }).then(() => {
