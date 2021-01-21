@@ -5,7 +5,7 @@ RUN mkdir -p /opt && \
     useradd -r -u 999 -g mid mid
 
 RUN apt-get -q update && apt-get install -qy unzip \
-    wget vim && \ 
+    wget vim curl iputils-ping && \ 
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
