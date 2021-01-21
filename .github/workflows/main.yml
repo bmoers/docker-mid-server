@@ -17,6 +17,7 @@ jobs:
         DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
         MONGODB_URL: ${{ secrets.MONGODB_URL }}
         MONGODB_NAME: ${{ secrets.MONGODB_NAME }} 
+        FORCE_REFRESH: ${{ secrets.FORCE_REFRESH }}
       run: |
         docker run --rm \
         --env DOCKER_USER_NAME \
