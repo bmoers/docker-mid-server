@@ -136,7 +136,8 @@ const dockerBuild = (command, tags, city, build) => {
 
 Promise.try(() => {
     return getBuilds().then((builds) => {
-        if (process.env.FORCE_REFRESH !== 'true')
+        console.log(`FORCE_REFRESH: ${process.env.FORCE_REFRESH}`);
+        if (process.env.FORCE_REFRESH != 'true')
             return builds;
 
         // force reset build done
