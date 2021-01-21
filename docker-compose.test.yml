@@ -3,20 +3,20 @@ version: '3'
 services:
   mid-server:
     build:
-      context: .
+      context: ./docker
       args: 
         URL: https://install.service-now.com/glide/distribution/builds/package/app-signed/mid/2020/08/05/mid.newyork-06-26-2019__patch10-07-30-2020_08-05-2020_0901.linux.x86-64.zip
     env_file:
-      - .env
+      - ./test/.env
     restart: 
       unless-stopped
-    #volumes:
-    #  - ./custom_ca.crt:/opt/agent/custom_ca.crt
-    #healthcheck:
-    #  test: pgrep -af /opt/agent/bin/./wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1
-    #  interval: 15s
-    #  timeout: 5s
-    #  retries: 6
+    volumes:
+      - ./test/custom_ca.crt:/opt/agent/custom_ca.crt
+    healthcheck:
+      test: pgrep -af wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 6
 
 
 
