@@ -24,5 +24,6 @@ jobs:
         --env DOCKER_TOKEN \
         --env MONGODB_URL \
         --env MONGODB_NAME \
+        --env FORCE_REFRESH \
         -v /var/run/docker.sock:/var/run/docker.sock \
         $(docker build -q .)
