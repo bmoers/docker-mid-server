@@ -1,11 +1,4 @@
-node_modules
-app
-hooks
+*
 
-docker-compose.yml
-
-.eslintrc.js
-.gitignore
-.env
-
-README.md
+!Dockerfile
+!start.sh

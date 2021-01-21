@@ -5,6 +5,66 @@
 #rm -rf /opt/agent/config.xml
 #sed -i "s|10000000|5|g" /opt/agent/properties/glide.properties
 
+CUSTOM_BIND_MOUNT=/opt/agent/custom_ca.crt
+CUSTOM_CA_CERT_FILE=/opt/agent/cacerts.crt
+CUSTOM_CA_ALIAS="${CUSTOM_CA_ALIAS:-dockerExtraCaCerts}"
+WGET_CUSTOM_CACERT=""
+
+
+# # # # #
+# Add custom ca cert to java keystore 
+# either via $CUSTOM_BIND_MOUNT file or
+# $CUSTOM_CA_CERT environment variable (text)
+#
+
+rm -rf ${CUSTOM_CA_CERT_FILE}
+
+if [[ -f $CUSTOM_BIND_MOUNT ]]
+then
+    echo "DOCKER: using customCaCert via bind mount to $CUSTOM_BIND_MOUNT"
+    cp $CUSTOM_BIND_MOUNT ${CUSTOM_CA_CERT_FILE}
+
+elif [[ ! -z "$CUSTOM_CA_CERT" ]]
+then
+    echo "DOCKER: using customCaCert via environment variable \$CUSTOM_CA_CERT"
+    echo -e $CUSTOM_CA_CERT > ${CUSTOM_CA_CERT_FILE}
+
+fi
+
+if [[ -f ${CUSTOM_CA_CERT_FILE} ]]
+then
+    WGET_CUSTOM_CACERT="--ca-certificate=${CUSTOM_CA_CERT_FILE}"
+
+    if [[ `/opt/agent/jre/bin/keytool -keystore /opt/agent/jre/lib/security/cacerts -storepass changeit -noprompt --list | grep -i ${CUSTOM_CA_ALIAS}  | wc -l` == 0 ]]
+    then 
+        echo "DOCKER: adding customCaCert with alias '${CUSTOM_CA_ALIAS}' to /opt/agent/jre/lib/security/cacerts"
+        /opt/agent/jre/bin/keytool -import -alias ${CUSTOM_CA_ALIAS} -file ${CUSTOM_CA_CERT_FILE} -keystore /opt/agent/jre/lib/security/cacerts -storepass changeit -noprompt
+    else 
+        echo "DOCKER: customCaCert already in /opt/agent/jre/lib/security/cacerts"
+    fi 
+else 
+    echo "DOCKER: no customCaCert file defined"
+fi
+
+# # # # #
+# Check if the mid server was registered correctly
+#
+# If the container is killed before the setup has completed and the MID
+# was registered correctly, the sys_id is missing in the config.xml file
+#
+if [[ -f /opt/agent/config.xml ]]
+then
+    if [[ -z `grep -oP 'name="mid_sys_id" value="\K[^"]{32}' /opt/agent/config.xml` ]]
+    then
+        echo "Docker: config.xml invalid, reconfigure MID server"
+        rm -rf /opt/agent/config.xml 
+    fi
+fi
+
+# # # # #
+# First run, configure the properties in config.xml
+# subsequent run, ensure MID status is down
+# 
 if [[ ! -f /opt/agent/config.xml ]]
 then
     
@@ -12,11 +72,11 @@ then
     
     if [[ ! -z "$SN_HOST_NAME" ]]
     then
-        echo "Configuring Host Name: $SN_HOST_NAME (\$SN_HOST_NAME)"
+        echo "Docker: configuring Host Name: $SN_HOST_NAME (using \$SN_HOST_NAME)"
         sed -i "s|https://YOUR_INSTANCE.service-now.com|https://${SN_HOST_NAME}|g" /opt/agent/config.xml
     elif [[ ! -z "$HOST" ]]
     then
-        echo "Configuring Host Name: ${HOST}.service-now.com (\$HOST)"
+        echo "Docker: configuring Host Name: ${HOST}.service-now.com (using \$HOST)"
         sed -i "s|https://YOUR_INSTANCE.service-now.com|https://${HOST}.service-now.com|g" /opt/agent/config.xml
     fi
     
@@ -50,14 +110,18 @@ then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.password\" value=\"${PROXY_PASSWORD}\" encrypt=\"true\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
 else 
-    echo "DOCKER: Update MID Sever status";
+    # if the MID server was killed while status was UP in servicenow
+    # the start process hangs with error message about already a MID
+    # running with the same name :-| to fix, ensure the status is DOWN
+
+    echo "DOCKER: update MID sever status";
 
     SYS_ID=`grep -oP 'name="mid_sys_id" value="\K[^"]{32}' /opt/agent/config.xml`
     URL=`grep -oP '<parameter name="url" value="\K[^"]+' /opt/agent/config.xml`
 
     if [[ -z "$SYS_ID" || -z "$URL" ]]
     then
-        echo "DOCKER: Update MID Sever status: SYS_ID ($SYS_ID) or URL ($URL) not specified!";
+        echo "DOCKER: update MID sever status: SYS_ID ($SYS_ID) or URL ($URL) not specified!";
     else
         HTTP_PROXY=""
         if [[ ! -z "$PROXY" ]] 
@@ -81,24 +145,12 @@ else
             unset http_proxy
         fi
 
-        ## TODO CaCerts
-        #
-        # LIST
-        # ./jre/bin/keytool -keystore jre/lib/security/cacerts -storepass changeit -noprompt --list | grep -i custmoerCa
-        # 
-        # ADD
-        # ./jre/bin/keytool -import -alias custmoerCa -file customerCa.crt -keystore jre/lib/security/cacerts -storepass changeit -noprompt
-        # 
-        # SET
-        # -Djavax.net.ssl.trustStore=/app/security/truststore.jks
-        # -Djavax.net.ssl.trustStorePassword=myTrustStorePassword
+        echo "DOCKER: update MID sever status to DOWN";
 
-        # wget --ca-certificate={the_cert_file_path}  ${URL}
-
-        echo "DOCKER: Update MID Sever status: Set status to DOWN";
         wget -O- --method=PUT --body-data='{"status":"Down"}' \
             --header='Content-Type:application/json' \
-            --user "${USER_NAME}" --password "${PASSWORD}"  \
+            --user "${USER_NAME}" --password "${PASSWORD}" \
+            ${WGET_CUSTOM_CACERT} \
             "${URL}/api/now/table/ecc_agent/${SYS_ID}?sysparm_fields=status"
         echo -e ""
     fi
@@ -124,7 +176,7 @@ echo "DOCKER: start mid server"
 /opt/agent/bin/mid.sh start &
 
 
-## # # # # # # #
+# # # # # # # # #
 # Logfile Monitor
 # if by any chance the MID server hangs (e.g. upgrade) the log file will not be updated
 # in that case force the container to stop
