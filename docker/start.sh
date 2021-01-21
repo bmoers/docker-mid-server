@@ -200,11 +200,11 @@ do
     ctime="$(ls ${log_file} --time=ctime -l --time-style=+%s | awk '{ print $6 }')"
     ctime_current="$(date +%s)"
     ctime_diff="$((ctime_current-ctime))"
-    #logmon "${log_file} last updated ${ctime_diff} sec ago"
-    
+    logmon "${log_file} last updated ${ctime_diff} sec ago"
+
     if [ "${ctime_diff}" -ge "${ctime_max}" ]; then
         logmon "${log_file} was not updated for ${ctime_max}sec, MID server potentially frozen."
-        logmon "Stopping MID server now!"
+        logmon "Stopping MID server process $pid now!"
         kill -TERM $pid
         break
     else
