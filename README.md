@@ -62,7 +62,7 @@ ENV HOST "the <host>.service-now.com subdomain [legacy]"
 
 ## Custom Ca Certificate
 
-If you run the MID server behind a company firewall and need to inject a intermediate certificate following options are available:
+If you run the MID server behind a company firewall and need to inject a self signed certificate following options are available:
 
 * bind mount a custom.crt file to `/opt/agent/custom_ca.crt`
 * replace the new lines in the certificate with \n and set the `CUSTOM_CA_CERT` env with it
