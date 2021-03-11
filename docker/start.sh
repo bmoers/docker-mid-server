@@ -10,6 +10,11 @@ CUSTOM_CA_CERT_FILE=/opt/agent/cacerts.crt
 CUSTOM_CA_ALIAS="${CUSTOM_CA_ALIAS:-dockerExtraCaCerts}"
 WGET_CUSTOM_CACERT=""
 
+# # # # #
+# remove the pid file on start to avoid mid start to hang
+# 
+rm -rf /opt/agent/work/mid.pid
+
 
 # # # # #
 # Add custom ca cert to java keystore 
