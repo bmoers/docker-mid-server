@@ -58,14 +58,36 @@ ENV PROXY_PORT "proxy-port [optional]"
 ENV CUSTOM_CA_CERT "custom cert in one line [optional]"
 ENV CUSTOM_CA_ALIAS "alias used for the cert (default dockerExtraCaCerts) [optional]"
 ENV HOST "the <host>.service-now.com subdomain [legacy]"
+ENV EXT_PARAMS "additional parameters to be added or replaced in config.xml"
 ```
 
 ## Custom Ca Certificate
 
 If you run the MID server behind a company firewall and need to inject a self signed certificate following options are available:
 
-* bind mount a custom.crt file to `/opt/agent/custom_ca.crt`
-* replace the new lines in the certificate with \n and set the `CUSTOM_CA_CERT` env with it
+1. bind mount a custom.crt file to `/opt/agent/custom_ca.crt`
+2. replace the new lines in the certificate with `\n` and set it to the `CUSTOM_CA_CERT` var.
+
+## Extended Parameters
+
+Use the EXT_PARAMS variable to add or update any parameter in the config.xml file.
+
+```json
+// example
+[
+    {
+        "name": "mid.ssl.bootstrap.default.target_endpoint",
+        "value": "sn.local",
+        "type": "add"
+    },
+    {
+        "name": "mid.ssl.bootstrap.default.check_cert_revocation",
+        "value": "false"
+    }
+]
+// <parameter name="mid.ssl.bootstrap.default.check_cert_revocation" value="false"/>
+// <parameter name="mid.ssl.bootstrap.default.target_endpoint" value="sn.local"/>
+```
 
 ## Complete Example
 
@@ -76,8 +98,9 @@ $ docker run -d --name docker-mid-latest \
   --env PASSWORD=password \
   --env PROXY=gateway.company.com \
   --env PROXY_PORT=8080 \
-  --v "$(pwd)"/customer.crt:/opt/agent/custom_ca.crt \
+  -v "$(pwd)"/customer.crt:/opt/agent/custom_ca.crt \
   --env CUSTOM_CA_ALIAS=myCompanyCustomCrt \
+  --env 'EXT_PARAMS=[{ "name": "mid.ssl.bootstrap.default.check_cert_revocation", "value": "false", "type":"update" }]' \
   --health-cmd='pgrep -af /opt/agent/bin/./wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1' \
   --health-interval=15s \
   --health-retries=6 \
