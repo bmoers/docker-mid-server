@@ -114,6 +114,40 @@ then
     then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.password\" value=\"${PROXY_PASSWORD}\" encrypt=\"true\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
+
+    if [[ ! -z "$EXT_PARAMS" ]]
+    then
+        if [[ $EXT_PARAMS == \[* ]] 
+        then
+            echo "DOCKER: Processing extended parameters"
+
+            for k in $(jq 'keys | .[]' <<< "$EXT_PARAMS"); do
+                J_ROW=$(jq -r ".[$k]" <<< "$EXT_PARAMS");
+                
+                EXT_NAME=$(jq -r '.name' <<< "$J_ROW");
+                EXT_VALUE=$(jq -r '.value' <<< "$J_ROW");
+                EXT_TYPE=$(jq -r '.type' <<< "$J_ROW");
+
+                EXT_CHECK=`grep -P "<parameter name=\"$EXT_NAME\"" /opt/agent/config.xml`
+                if [[ "$EXT_TYPE" != "add" && -z "$EXT_CHECK" ]]
+                then
+                    EXT_TYPE="add"
+                fi
+                
+                echo "DOCKER: Extended parameter - name: '$EXT_NAME', value: '$EXT_VALUE', type: '$EXT_TYPE'";
+
+                if [[ "$EXT_TYPE" == "add" ]]
+                then
+                    sed -i "s|</parameters>|    <parameter name=\"${EXT_NAME}\" value=\"${EXT_VALUE}\"/>\n</parameters>|g" /opt/agent/config.xml
+                else
+                    sed -i "s|${EXT_CHECK}|    <parameter name=\"${EXT_NAME}\" value=\"${EXT_VALUE}\"/>|g" /opt/agent/config.xml
+                fi
+
+            done
+        else
+            echo "DOCKER: WARN 'EXT_PARAMS' must be an array!"
+        fi
+    fi
 else 
     # if the MID server was killed while status was UP in servicenow
     # the start process hangs with error message about already a MID
@@ -168,7 +202,7 @@ logmon(){
 
 # SIGTERM-handler
 term_handler() {
-    echo "DOCKER: stop mid server"
+    echo "DOCKER: Stop MID server"
     /opt/agent/bin/mid.sh stop & wait ${!}
     exit 143; # 128 + 15 -- SIGTERM
 }
@@ -177,7 +211,7 @@ trap 'kill ${!}; term_handler' SIGTERM
 
 touch /opt/agent/logs/agent0.log.0
  
-echo "DOCKER: start mid server"
+echo "DOCKER: Start MID server"
 /opt/agent/bin/mid.sh start &
 
 
