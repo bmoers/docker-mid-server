@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.14.0
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -10,7 +10,7 @@ FROM alpine:latest
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 RUN apk add --update nodejs \
-    nodejs-npm \
+    npm \
     docker \
     openrc \
     bash && \
