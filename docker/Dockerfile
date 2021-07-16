@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 RUN mkdir -p /opt && \
     groupadd -g 999 mid && \
