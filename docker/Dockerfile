@@ -4,8 +4,18 @@ RUN mkdir -p /opt && \
     groupadd -g 999 mid && \
     useradd -r -u 999 -g mid mid
 
-RUN apt-get -q update && apt-get install -qy unzip \
-    wget vim curl iputils-ping jq && \ 
+RUN apt-get -q update && \
+    apt-get install -qy \
+    unzip \
+    wget \ 
+    vim \ 
+    curl \
+    iputils-ping \
+    jq \ 
+    nmap \ 
+    dnsutils \ 
+    net-tools && \ 
+    lsof && \ 
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
