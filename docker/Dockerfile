@@ -14,7 +14,7 @@ RUN apt-get -q update && \
     jq \ 
     nmap \ 
     dnsutils \ 
-    net-tools && \ 
+    net-tools \ 
     lsof && \ 
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
