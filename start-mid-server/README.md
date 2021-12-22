@@ -10,7 +10,7 @@ To start a new MID server on you current Docker environment, run:
 
 ```bash
 docker run --rm -it \
-    --env SN_HOST_NAME=dev12345 \
+    --env SN_HOST_NAME=dev12345.service-now.com \
     --env USER_NAME=username \
     --env PASSWORD=password \
     -v /var/run/docker.sock:/var/run/docker.sock \

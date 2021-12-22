@@ -12,8 +12,8 @@
   "dependencies": {
     "async-child-process": "^1.1.1",
     "bluebird": "^3.7.2",
-    "dotenv": "^8.2.0",
-    "mongodb": "^3.6.1",
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.2.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "saslprep": "^1.0.3"

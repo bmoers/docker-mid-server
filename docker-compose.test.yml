@@ -5,11 +5,11 @@ services:
     build:
       context: ./docker
       args: 
-        URL: https://install.service-now.com/glide/distribution/builds/package/app-signed/mid/2020/08/05/mid.newyork-06-26-2019__patch10-07-30-2020_08-05-2020_0901.linux.x86-64.zip
+        URL: https://install.service-now.com/glide/distribution/builds/package/app-signed/mid/2021/09/16/mid.rome-06-23-2021__patch1-hotfix1-09-15-2021_09-16-2021_1434.linux.x86-64.zip
     env_file:
       - ./test/.env
     environment:
-      - 'EXT_PARAMS=[{ "name": "mid.ssl.bootstrap.default.target_endpoint", "value": "sn.local", "type":"add" }]'
+      - 'EXT_PARAMS=[{ "name": "mid.ssl.bootstrap.default.target_endpoint", "value": "sn.local", "type":"add" },{ "name": "mid.poll.time", "value": "5", "type":"add" }]'
     restart: 
       unless-stopped
     volumes:

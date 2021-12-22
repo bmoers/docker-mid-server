@@ -5,6 +5,13 @@
 
 This is the full collection of all Service-Now MID Server versions as Docker container.
 
+## A note on Apache Log4j Vulnerability (CVE-2021-44228)
+
+> According to [KB1000959](https://support.servicenow.com/kb?id=kb_article_view&sysparm_article=KB1000959) the MID servers are not affected by this vulnerability.  
+> However, as the MID Server **does** contain the files for log4j 2.14.0, theoretically the vulnerability is still present.
+> Therefore the JndiLookup.class is removed from the log4j-core*.jar in all versions of the Docker MID server.  
+> Make sure you pull the latest version of the Docker image.
+
 ## Supported tags
 
 * latest MID of latest ServiceNow release
@@ -25,9 +32,9 @@ Examples:
   * `orlando.11-05-2020_1323`
   * `orlando.first`, `orlando`
 
-> If you need to start a specific version of MID server please have a look at the available [tags](https://hub.docker.com/r/moers/mid-server/tags)
-
-> If you're not sure what version you have, use the city-tag e.g. `moers/mid-server:newyork`. The MID server will auto upgrade to the required version.
+> If you need to start a specific version of MID server please have a look at the available [tags](https://hub.docker.com/r/moers/mid-server/tags)  
+> 
+> If you're not sure what version you have, use the city-tag e.g. `moers/mid-server:rome`. The MID server will auto upgrade to the required version.
 
 ## Dockerfile
 
@@ -38,11 +45,11 @@ All versions are based on the same [Dockerfile](https://github.com/bmoers/docker
 Mandatory parameters:
 
 ```bash
-$ docker run -d --name docker-mid-newyork \
+$ docker run -d --name docker-mid-rome \
   --env SN_HOST_NAME=dev12345.service-now.com \
   --env USER_NAME=username \
   --env PASSWORD=password \
-  moers/mid-server:newyork
+  moers/mid-server:rome
 ```
 
 ## Supported Environment Variables
@@ -72,8 +79,12 @@ If you run the MID server behind a company firewall and need to inject a self si
 
 Use the EXT_PARAMS variable to add or update any parameter in the config.xml file.
 
+Below JSON will add/update following parameter in the config.xml file:
+
+* `<parameter name="mid.ssl.bootstrap.default.check_cert_revocation" value="false"/>`
+* `<parameter name="mid.ssl.bootstrap.default.target_endpoint" value="sn.local"/>`
+
 ```json
-// example
 [
     {
         "name": "mid.ssl.bootstrap.default.target_endpoint",
@@ -85,8 +96,6 @@ Use the EXT_PARAMS variable to add or update any parameter in the config.xml fil
         "value": "false"
     }
 ]
-// <parameter name="mid.ssl.bootstrap.default.check_cert_revocation" value="false"/>
-// <parameter name="mid.ssl.bootstrap.default.target_endpoint" value="sn.local"/>
 ```
 
 ## Complete Example
