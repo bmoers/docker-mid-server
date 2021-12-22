@@ -4,18 +4,8 @@ RUN mkdir -p /opt && \
     groupadd -g 999 mid && \
     useradd -r -u 999 -g mid mid
 
-RUN apt-get -q update && \
-    apt-get install -qy \
-    unzip \
-    wget \ 
-    vim \ 
-    curl \
-    iputils-ping \
-    jq \ 
-    nmap \ 
-    dnsutils \ 
-    net-tools \ 
-    lsof && \ 
+RUN apt-get -q update && apt-get install -qy unzip \
+    wget vim curl iputils-ping jq && \ 
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
@@ -68,6 +58,10 @@ RUN apt-get -q update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/*
+
+# mitigate CVE-2021-44228 Log4j and remove the JndiLookup class from the core jar
+RUN zip -q -d /opt/agent/lib/log4j-core*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class || true
+
 # HEALTHCHECK --interval=15s --retries=6 --timeout=5s --start-period=30s CMD pgrep -af /opt/agent/bin/./wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1 
 
 ADD ./start.sh /opt
