@@ -14,7 +14,7 @@
     "bluebird": "^3.7.2",
     "minimist": "^1.2.5",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5",
-    "uuid": "^8.1.0"
+    "request-promise": "^4.2.6",
+    "uuid": "^8.3.2"
   }
 }
