@@ -17,7 +17,7 @@ const getCities = () => {
         MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
-            dbo.collection("city").find({}).toArray((err, result) => {
+            dbo.collection("city").find({ active: true }).toArray((err, result) => {
                 if (err)
                     return reject(err);
 
@@ -28,13 +28,13 @@ const getCities = () => {
     });
 }
 
-const getBuilds = () => {
+const getBuilds = (cities) => {
     return new Promise((resolve, reject) => {
         var url = process.env.MONGODB_URL;
         MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
             if (err) reject(err);
             var dbo = db.db(process.env.MONGODB_NAME);
-            dbo.collection("build").find({}).toArray((err, result) => {
+            dbo.collection("build").find({ city: { $in: cities } }).toArray((err, result) => {
                 if (err)
                     return reject(err);
 
@@ -100,7 +100,7 @@ const dockerBuild = (command, tags, city, build) => {
             return execAsync(`docker rmi --force ${tag}`, {
                 cwd: './docker'
             }).then(({ stdout, stderr }) => {
-                if (stdout.trim()){
+                if (stdout.trim()) {
                     console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
                 }
             });
@@ -134,39 +134,39 @@ const dockerBuild = (command, tags, city, build) => {
     });
 }
 
-Promise.try(() => {
-    return getBuilds().then((builds) => {
-        console.log(`FORCE_REFRESH: ${process.env.FORCE_REFRESH}`);
-        if (process.env.FORCE_REFRESH != 'true')
-            return builds;
+Promise.try(async () => {
 
+    const cities = await getCities();
+    let builds = await getBuilds(cities);
+
+    if (process.env.FORCE_REFRESH == 'true') {
         // force reset build done
         console.warn('FORCE REFRESH MODE: replacing all images !')
-        return builds.map((build) => {
+        builds = builds.map((build) => {
             build.done = false;
             return build;
         });
-    }).then((builds) => {
-        return builds.reduce((out, build) => {
-            if (out[build.city]) {
-                out[build.city].push(build);
-            } else {
-                out[build.city] = [build];
-            }
-            return out;
-        }, {})
-    }).then((versions) => {
-        return getCities().then((cities) => {
-            return { versions, cities }
-        });
-    });
+    }
+
+    const versions = builds.reduce((out, build) => {
+        if (out[build.city]) {
+            out[build.city].push(build);
+        } else {
+            out[build.city] = [build];
+        }
+        return out;
+    }, {});
+
+    return { versions, cities }
+
 }).then(({ versions, cities }) => {
 
-    //console.log("%j", versions)
-    //console.log("%j", cities)
+    // console.log("%j", versions)
+    // console.log("%j", cities)
+    // return;
 
     return Promise.mapSeries(cities, (city) => {
-        
+
         console.log(`process city ${city}`);
 
         return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
@@ -185,8 +185,8 @@ Promise.try(() => {
             console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
             return [];
         }).then(async (patchUrls) => {
-            
-            const builds =  await Promise.mapSeries(patchUrls, async (url) => {
+
+            const builds = await Promise.mapSeries(patchUrls, async (url) => {
 
                 console.log('parsing mid version info from', url);
 
@@ -201,7 +201,7 @@ Promise.try(() => {
 
                     let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
                     let m = html.match(regex);
-                    
+
                     if (m) {
                         out.tag = m[1];
                     } else {
@@ -214,7 +214,7 @@ Promise.try(() => {
                     } else {
                         console.warn('Date not found')
                     }
-                
+
                     if (!out.tag || !out.date) {
                         console.warn(`Parsing failed! ${url}`);
                         console.log(out)
@@ -227,7 +227,7 @@ Promise.try(() => {
                 return out;
 
             });
-            
+
             return builds.filter((build) => build.tag && build.date);
 
         }).then((builds) => {
@@ -267,7 +267,7 @@ Promise.try(() => {
                 try {
                     await request({ method: 'HEAD', url: build.url });
                     build.zipExits = true;
-                } catch (e){
+                } catch (e) {
                     build.zipExits = false;
                     console.log("zip file not found on server for build", build);
                 }
