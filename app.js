@@ -7,319 +7,250 @@ const Promise = require('bluebird');
 const { execAsync } = require('async-child-process');
 
 
-//const cities = ['paris', 'orlando', 'newyork', 'madrid', 'london'];//, 'madrid', 'london']//;, 'madrid', 'london', 'jakarta'];
+const { MongoClient } = require("mongodb");
+const client = new MongoClient(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+var db;
 
-const MongoClient = require('mongodb').MongoClient;
+const connect = async () => {
+    await client.connect();
+    return client.db();
+}
 
 const getCities = () => {
     return new Promise((resolve, reject) => {
-        var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
-            if (err) reject(err);
-            var dbo = db.db(process.env.MONGODB_NAME);
-            dbo.collection("city").find({ active: true }).toArray((err, result) => {
-                if (err)
-                    return reject(err);
-
-                db.close();
-                resolve(result.map((city) => city.name));
-            });
+        db.collection("city").find({ active: true }).toArray((err, result) => {
+            if (err)
+                return reject(err);
+            resolve(result.map((city) => city.name));
         });
     });
 }
 
 const getBuilds = (cities) => {
     return new Promise((resolve, reject) => {
-        var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
-            if (err) reject(err);
-            var dbo = db.db(process.env.MONGODB_NAME);
-            dbo.collection("build").find({ city: { $in: cities } }).toArray((err, result) => {
-                if (err)
-                    return reject(err);
-
-                db.close();
-                resolve(result);
-            });
+        db.collection("build").find({ city: { $in: cities } }).toArray((err, result) => {
+            if (err)
+                return reject(err);
+            resolve(result);
         });
     });
 }
 const addBuild = (build) => {
     return new Promise((resolve, reject) => {
-        var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
-            if (err) reject(err);
-            var dbo = db.db(process.env.MONGODB_NAME);
-            dbo.collection("build").insertOne(build, (err, res) => {
-                if (err) {
-                    console.log(err);
-                    return reject(err);
-                }
-                //console.log((res.result.upserted ? "Added" : "Skipped") + " build -> " + build);
-                db.close();
-                resolve(res.ops);
-            });
+        db.collection("build").insertOne(build, (err, res) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            resolve(res.ops);
         });
     });
 }
 
 const updateBuild = (build) => {
+    console.log(build._id)
     if (!build._id)
         return addBuild(build);
 
     return new Promise((resolve, reject) => {
-        var url = process.env.MONGODB_URL;
-        MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
-            if (err) reject(err);
-            var dbo = db.db(process.env.MONGODB_NAME);
-            //console.log('UPDATE', build);
-            dbo.collection("build").updateOne({ _id: build._id }, { $set: build }, { upsert: true }, (err, res) => {
-                if (err) {
-                    console.log(err);
-                    return reject(err);
-                }
-                //console.log((res.result.upserted ? "Added" : "Updated") + " version -> ", build);
-
-                db.close();
-                //console.log('res.result', res);
-                resolve(res.ops);
-            });
+        db.collection("build").updateOne({ _id: build._id }, { $set: build }, { upsert: true }, (err, res) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            resolve(res.ops);
         });
     });
 }
 
-const dockerBuild = (command, tags, city, build) => {
+const dockerBuild = async (command, tags, city, build) => {
+
     console.log(`Building image: ${city}, version: ${build.version}, tags: ${tags}`);
+    await execAsync(`docker login -u ${process.env.DOCKER_USER_NAME} -p ${process.env.DOCKER_TOKEN}`, { cwd: './docker' })
 
-    return Promise.try(() => {
-        return execAsync(`docker login -u ${process.env.DOCKER_USER_NAME} -p ${process.env.DOCKER_TOKEN}`, { cwd: './docker' })
-    }).then(() => {
-        // cleanup to ensure tags are fresh
-        return Promise.each(tags, ((tag) => {
-            console.log('remove local image: ', `docker rmi --force ${tag}`);
-            return execAsync(`docker rmi --force ${tag}`, {
-                cwd: './docker'
-            }).then(({ stdout, stderr }) => {
-                if (stdout.trim()) {
-                    console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
-                }
-            });
-        }));
+    // build image with all tags
+    console.log(`build image: ${tags}`)
+    const { stdout: buildStdout } = await execAsync(command, { cwd: './docker' });
+    console.log(`\t${buildStdout.split('\n').slice(-2)[0]}`);
+    console.log("\tbuild done");
 
-    }).then(() => {
-        //console.log(`dockerBuild: ${command}`);
-        return execAsync(command, { cwd: './docker' }).then(({ stdout, stderr }) => {
-            //console.log(stdout, stderr)
-            console.log("\tbuild done");
+    // push image with all tags in sequence
+    await Promise.each(tags, (async (tag) => {
+        console.log(`push tag: ${tag}`)
+        const { stdout: pushStdout } = await execAsync(`docker push ${tag}`, { cwd: './docker' });
+        console.log(`\t${pushStdout.split('\n').slice(-2)[0]}`);
+        console.log("\ttag done");
+    }))
 
-            return Promise.each(tags, ((tag) => {
-                command = `docker push ${tag}`;
-                console.log(`push tag ${tag}`)
-                return execAsync(command, { cwd: './docker' }).then(({ stdout, stderr }) => {
-                    console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
-                    console.log("\ttag done");
-                });
-            }));
-        });
-    }).then(() => {
-        // cleanup as my disk is not endless
-        return Promise.each(tags, ((tag) => {
-            console.log('remove local image: ', `docker rmi --force ${tag}`);
-            return execAsync(`docker rmi --force ${tag}`, {
-                cwd: './docker'
-            }).then(({ stdout, stderr }) => {
-                console.log(`\t${stdout.split('\n').slice(-2)[0]}`);
-            });
-        }));
-    });
+    // cleanup as my disk is not endless
+    await Promise.all(tags.map(async (tag) => {
+        console.log(`remove local tag:  ${tag}`);
+        const { stdout: rmiStdout } = await execAsync(`docker rmi --force ${tag}`, { cwd: './docker' });
+        console.log(`\t${rmiStdout.split('\n').slice(-2)[0]}`);
+    }));
+
 }
 
-Promise.try(async () => {
 
-    const cities = await getCities();
-    let builds = await getBuilds(cities);
+const getNewBuilds = async (city, existingBuilds = []) => {
+    console.log(`process city ${city}`);
 
-    if (process.env.FORCE_REFRESH == 'true') {
-        // force reset build done
-        console.warn('FORCE REFRESH MODE: replacing all images !')
-        builds = builds.map((build) => {
-            build.done = false;
-            return build;
-        });
+    // get the city patchURLs from the release notes
+    const patchUrls = [];
+    try {
+
+        const html = await request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`);
+        const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/${city}-release-notes\/page\/release-notes\/[^\/]+\/[^-]+-patch[^\.]+\.html)`, 'gm');
+        let m;
+
+        while ((m = regex.exec(html)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === regex.lastIndex) {
+                regex.lastIndex++;
+            }
+            patchUrls.push(m[1])
+        }
+    } catch (e) {
+        console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
     }
 
-    const versions = builds.reduce((out, build) => {
-        if (out[build.city]) {
-            out[build.city].push(build);
-        } else {
-            out[build.city] = [build];
+    // get all mid builds from the patchUrl page
+    let builds = await Promise.mapSeries(patchUrls, async (url) => {
+
+        console.log('parsing mid version info from', url);
+
+        const out = {
+            tag: undefined,
+            date: undefined
+        };
+
+        try {
+            let html = await request(url);
+            html = html.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
+
+            let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
+            let m = html.match(regex);
+
+            if (m) {
+                out.tag = m[1];
+            } else {
+                console.warn('Tag not found')
+            }
+            regex = />Build date:\s+([^<]+)</i
+            m = html.match(regex);
+            if (m) {
+                out.date = m[1];
+            } else {
+                console.warn('Date not found')
+            }
+
+            if (!out.tag || !out.date) {
+                console.warn(`Parsing failed! ${url}`);
+                console.log(out)
+            }
+
+        } catch (e) {
+            console.error('Request failed: ', url);
         }
         return out;
-    }, {});
+    });
 
-    return { versions, cities }
+    // only keep the ones which are correct
+    builds = builds.filter((build) => build.tag && build.date && build.date.split(/[_-]/).length == 4);
 
-}).then(({ versions, cities }) => {
+    // construct build object
+    builds = builds.map((build) => {
+        const dateArray = build.date.split(/[_-]/);
+        build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
 
-    // console.log("%j", versions)
-    // console.log("%j", cities)
-    // return;
+        build.city = city;
+        build.version = `${build.tag}_${build.date}`;
+        build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
+        build.tagname = build.tag.split('__')[1];
+        build.done = false;
+        return build;
+    });
 
-    return Promise.mapSeries(cities, (city) => {
+    const existingBuildIds = existingBuilds.map((eb) => eb.id);
+    // find the builds which are not in the db yet
+    let newBuilds = builds.filter((build) => !existingBuildIds.includes(build.id));
 
-        console.log(`process city ${city}`);
+    console.log(`newBuilds : ${newBuilds.length}`)
 
-        return request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`).then((html) => {
-            const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/${city}-release-notes\/page\/release-notes\/[^\/]+\/[^-]+-patch[^\.]+\.html)`, 'gm');
-            let m;
-            const patchUrls = [];
-            while ((m = regex.exec(html)) !== null) {
-                // This is necessary to avoid infinite loops with zero-width matches
-                if (m.index === regex.lastIndex) {
-                    regex.lastIndex++;
-                }
-                patchUrls.push(m[1])
-            }
-            return patchUrls;
-        }).catch((e) => {
-            console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
-            return [];
-        }).then(async (patchUrls) => {
+    //and check if zip file exists
+    newBuilds = await Promise.mapSeries(newBuilds, async (build) => {
+        console.log('check for zip file ', build.url)
+        try {
+            await request({ method: 'HEAD', url: build.url });
+            build.zipExits = true;
+        } catch (e) {
+            build.zipExits = false;
+            console.warn("zip file not found on server for build", build.url);
+        }
+        return build;
+    }).filter((build) => build.zipExits);
 
-            const builds = await Promise.mapSeries(patchUrls, async (url) => {
+    return existingBuilds.concat(newBuilds).filter((build) => build.zipExits);;
+}
 
-                console.log('parsing mid version info from', url);
 
-                const out = {
-                    tag: undefined,
-                    date: undefined
-                };
+(async () => {
+    try {
+        db = await connect();
+        const cities = (await getCities()).sort();
+        let existingBuilds = await getBuilds(cities);
 
-                try {
-                    let html = await request(url);
-                    html = html.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
-
-                    let regex = />Build tag:\s+(?:glide-)?([^<]+)</i
-                    let m = html.match(regex);
-
-                    if (m) {
-                        out.tag = m[1];
-                    } else {
-                        console.warn('Tag not found')
-                    }
-                    regex = />Build date:\s+([^<]+)</i
-                    m = html.match(regex);
-                    if (m) {
-                        out.date = m[1];
-                    } else {
-                        console.warn('Date not found')
-                    }
-
-                    if (!out.tag || !out.date) {
-                        console.warn(`Parsing failed! ${url}`);
-                        console.log(out)
-                    }
-
-                } catch (e) {
-                    console.error('Request failed: ', url);
-                }
-
-                return out;
-
-            });
-
-            return builds.filter((build) => build.tag && build.date);
-
-        }).then((builds) => {
-
-            return builds.map((build, index) => {
-
-                build.city = city;
-
-                const dateArray = build.date.split(/[_-]/);
-                if (dateArray.length == 4) {
-                    build.version = `${build.tag}_${build.date}`;
-                    build.url = `https://install.service-now.com/glide/distribution/builds/package/mid/${dateArray[2]}/${dateArray[0]}/${dateArray[1]}/mid.${build.version}.linux.x86-64.zip`
-                    build.id = `${dateArray[2]}${dateArray[0]}${dateArray[1]}${dateArray[3]}`
-                    build.tagname = build.tag.split('__')[1]
-                } else {
-                    console.warn("patch does not match", build.date)
-                }
+        if (process.env.FORCE_REFRESH == 'true') {
+            // force reset build done
+            console.warn('FORCE REFRESH MODE: replacing all images !')
+            existingBuilds = existingBuilds.map((build) => {
+                build.done = false;
                 return build;
             });
+        }
 
-        }).then((builds) => {
-
-            //console.dir(builds, { depth: null, colors: true });
-
-            const existingBuilds = versions[city];
-            if (existingBuilds) {
-                builds = builds.filter((b) => {
-                    return !existingBuilds.some((ex) => ex.tag == b.tag)
-                });
+        const versions = existingBuilds.reduce((out, build) => {
+            if (out[build.city]) {
+                out[build.city].push(build);
+            } else {
+                out[build.city] = [build];
             }
-
-            console.log('New Builds for', city, builds);
-
-            return Promise.map(builds, async (build) => {
-                console.log('check if zip file exists', build.url)
-
-                try {
-                    await request({ method: 'HEAD', url: build.url });
-                    build.zipExits = true;
-                } catch (e) {
-                    build.zipExits = false;
-                    console.log("zip file not found on server for build", build);
-                }
-                return build;
-
-            }).then((buildsZip) => {
-                return {
-                    city,
-                    builds: buildsZip
-                };
-            })
-
-        });
-    }).then((newBuilds) => {
-
-        // convert to city map
-        return newBuilds.reduce((out, row) => {
-            // remove the ones without an id
-            out[row.city] = row.builds.filter((p) => p.id);
             return out;
         }, {});
-    }).then((newBuilds) => {
 
-        // merge new builds with existing ones
-        Object.keys(newBuilds).forEach((nCity) => {
-            if (!newBuilds[nCity].length)
-                return;
+        //console.log("%j", cities)
 
-            if (!versions[nCity]) {
-                versions[nCity] = newBuilds[nCity]
-            } else {
-                versions[nCity] = newBuilds[nCity].concat(versions[nCity])
+        const cityBuilds = await Promise.mapSeries(cities, async (city) => {
+            const builds = await getNewBuilds(city, versions[city]);
+            return {
+                city,
+                builds
             }
         });
-        return versions;
 
-    }).then((buildVersions) => {
 
-        //console.dir(buildVersions, { depth: null, colors: true });
-        //process.exit(0)
+        //console.log("%j", cityBuilds)
 
-        const versionsLen = Object.keys(buildVersions).length;
+
+        const buildVersions = {};
+        cityBuilds.forEach((obj) => {
+            buildVersions[obj.city] = obj.builds
+        });
+
+        const citiesSorted = Object.keys(buildVersions).sort();
+        const versionsLen = citiesSorted.length;
         console.log('Total number of cities ', versionsLen)
+        console.log('Cities ', citiesSorted.join(', '));
 
-        return Promise.each(Object.keys(buildVersions).sort(), (city, cityIndex) => {
+        await Promise.each(citiesSorted, async (city, cityIndex) => {
 
             console.log(`City: '${city}' index: ${cityIndex}`);
 
             const builds = buildVersions[city];
-            return Promise.each(builds.sort((a, b) => a.id - b.id), (build, buildIndex) => {
+            const buildsSorted = builds.sort((a, b) => a.id - b.id);
 
-                return Promise.try(() => {
+            await Promise.each(buildsSorted, async (build, buildIndex) => {
+                try {
 
                     if (!build.zipExits) {
                         console.log("zip does not exist, skip ", build.url);
@@ -331,48 +262,32 @@ Promise.try(async () => {
                         return;
                     }
 
+                    const tags = [`moers/mid-server:${city}.${build.date}`]; // `moers/mid-server:${city}.${build.tagname}`, 
 
-                    return Promise.try(() => {
-                        const tags = [`moers/mid-server:${city}.${build.date}`]; // `moers/mid-server:${city}.${build.tagname}`, 
+                    if (buildIndex == 0) {
+                        tags.push(`moers/mid-server:${city}`);
+                        tags.push(`moers/mid-server:${city}.first`);
+                    }
 
-                        if (buildIndex == 0) {
-                            tags.push(`moers/mid-server:${city}`);
-                            tags.push(`moers/mid-server:${city}.first`);
-                        }
-
-                        if (buildIndex == builds.length - 1) {
-                            tags.push(`moers/mid-server:${city}.latest`);
-                            if (cityIndex == versionsLen - 1)
-                                tags.push('moers/mid-server:latest')
-                        }
-                        return dockerBuild(`docker build -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
-
-                    }).then(() => {
-                        //const tags = [`moers/mid-server:${city}.pin.${build.tagname}`, `moers/mid-server:${city}.pin.${build.date}`];
-                        //return dockerBuild(`docker build -f ./Dockerfile --build-arg URL=${build.url} --build-arg VERSION=${build.tag} ${tags.map((t) => `--tag ${t}`).join(' ')} .`, tags, city, build);
-                    });
-
-
-                }).then(() => {
+                    if (buildIndex == builds.length - 1) {
+                        tags.push(`moers/mid-server:${city}.latest`);
+                        if (cityIndex == versionsLen - 1)
+                            tags.push('moers/mid-server:latest')
+                    }
+                    //console.log(tags);
+                    await dockerBuild(`docker build -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
                     build.done = true;
-                    return updateBuild(build);
-                }).catch((e) => {
+                    await updateBuild(build);
+
+                } catch (e) {
                     console.error('somethings wrong', e)
-                });
+                }
 
             });
-
-
-
-        }).then(() => {
-            //console.dir(buildVersions, { depth: null, colors: true });
         });
 
-    }).then(() => {
-        //return Promise.delay(9999999)
-    });
-
-}).catch((e) => {
-    console.error(e);
-});
+    } finally {
+        client.close();
+    }
+})();
 
