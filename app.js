@@ -48,7 +48,6 @@ const addBuild = (build) => {
 }
 
 const updateBuild = (build) => {
-    console.log(build._id)
     if (!build._id)
         return addBuild(build);
 
