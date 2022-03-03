@@ -99,7 +99,7 @@ const getNewBuilds = async (city, existingBuilds = []) => {
     try {
 
         const html = await request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`);
-        const regex = new RegExp(`(https:\/\/docs\.servicenow\.com\/bundle\/[^\/]+-release-notes\/page\/release-notes\/quality\/[^\/\s]+\.html)`, 'gm');
+        const regex = /(https:\/\/docs\.servicenow\.com\/bundle\/[^\/]+-release-notes\/page\/release-notes\/quality\/[^\/\s]+\.html)/g
         let m;
 
         while ((m = regex.exec(html)) !== null) {
