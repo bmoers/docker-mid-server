@@ -1,4 +1,10 @@
-FROM alpine:3.14.0
+FROM docker
+
+COPY --from=docker/buildx-bin:latest /buildx /usr/libexec/docker/cli-plugins/docker-buildx
+
+RUN docker buildx create --name builderName && \
+    docker buildx use builderName && \
+    docker buildx inspect builderName --bootstrap 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
