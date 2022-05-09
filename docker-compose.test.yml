@@ -2,8 +2,8 @@ version: '3'
 
 services:
   mid-server:
-    #platform: linux/arm64
-    platform: linux/amd64
+    platform: linux/arm64
+    #platform: linux/amd64
     #user: 1005120000:1005120000
     build:
       context: ./docker
