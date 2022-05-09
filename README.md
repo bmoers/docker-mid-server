@@ -23,18 +23,19 @@ This is the full collection of all Service-Now MID Server versions as Docker con
 
 Examples:
 
-* paris:
-  * `paris.latest`
-  * `paris.11-06-2020_1142`
-  * `paris.first`, `paris`
-* orlando:
-  * `orlando.latest`
-  * `orlando.11-05-2020_1323`
-  * `orlando.first`, `orlando`
+* sandiego:
+  * `sandiego.latest`
+  * `sandiego.05-02-2022_1316`
+  * `sandiego.first`, `sandiego`
 
 > If you need to start a specific version of MID server please have a look at the available [tags](https://hub.docker.com/r/moers/mid-server/tags)  
-> 
+>
 > If you're not sure what version you have, use the city-tag e.g. `moers/mid-server:rome`. The MID server will auto upgrade to the required version.
+
+## ARM64 Images
+
+> The upgrade process is not supported for ARM64 images.
+> Therefore the ARM images are pinned to the exact version of the MID server and do not auto-upgrade.
 
 ## Dockerfile
 
@@ -45,11 +46,11 @@ All versions are based on the same [Dockerfile](https://github.com/bmoers/docker
 Mandatory parameters:
 
 ```bash
-$ docker run -d --name docker-mid-rome \
+$ docker run -d --name docker-mid \
   --env SN_HOST_NAME=dev12345.service-now.com \
   --env USER_NAME=username \
   --env PASSWORD=password \
-  moers/mid-server:rome
+  moers/mid-server:latest
 ```
 
 ## Supported Environment Variables
