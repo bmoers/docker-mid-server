@@ -73,6 +73,7 @@ const dockerBuild = async (command, tags, city, build) => {
     console.log(`\t${buildStdout.split('\n').slice(-2)[0]}`);
     console.log("\tbuild done");
 
+    /*
     // push image with all tags in sequence
     await Promise.each(tags, (async (tag) => {
         console.log(`push tag: ${tag}`)
@@ -80,7 +81,8 @@ const dockerBuild = async (command, tags, city, build) => {
         console.log(`\t${pushStdout.split('\n').slice(-2)[0]}`);
         console.log("\ttag done");
     }))
-
+    */
+   
     // cleanup as my disk is not endless
     await Promise.all(tags.map(async (tag) => {
         console.log(`remove local tag:  ${tag}`);
@@ -274,7 +276,7 @@ const getNewBuilds = async (city, existingBuilds = []) => {
                             tags.push('moers/mid-server:latest')
                     }
                     //console.log(tags);
-                    await dockerBuild(`docker build -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
+                    await dockerBuild(`docker buildx build --platform linux/amd64,linux/arm64 --push -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
                     build.done = true;
                     await updateBuild(build);
 
