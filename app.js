@@ -82,7 +82,7 @@ const dockerBuild = async (command, tags, city, build) => {
         console.log("\ttag done");
     }))
     */
-   
+
     // cleanup as my disk is not endless
     await Promise.all(tags.map(async (tag) => {
         console.log(`remove local tag:  ${tag}`);
@@ -98,21 +98,24 @@ const getNewBuilds = async (city, existingBuilds = []) => {
 
     // get the city patchURLs from the release notes
     const patchUrls = [];
+    const availableVersions = `https://servicenow-be-prod.servicenow.com/api/bundle/${city}-release-notes/page/release-notes/available-versions.html`;
+
+    console.log(`get all versions from ${availableVersions}`)
     try {
-
-        const html = await request(`https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html`);
-        const regex = /(https:\/\/docs\.servicenow\.com\/bundle\/[^\/]+-release-notes\/page\/release-notes\/quality\/[^\/\s]+\.html)/g
+        const html = await request(availableVersions);        
+        const regex = new RegExp('(https:\\/\\/[^\\/]*\\.servicenow\\.com\\/bundle\\/'+city+'-release-notes\\/page\\/release-notes\\/quality\\/'+city+'[^\\/\\s]+.html)', 'g')        
         let m;
-
         while ((m = regex.exec(html)) !== null) {
             // This is necessary to avoid infinite loops with zero-width matches
             if (m.index === regex.lastIndex) {
                 regex.lastIndex++;
             }
-            patchUrls.push(m[1])
+            if(m[1]){
+                patchUrls.push(m[1])
+            }
         }
     } catch (e) {
-        console.error(`city ${city} http request failed! (https://docs.servicenow.com/bundle/${city}-release-notes/toc/release-notes/available-versions.html)`, e.message);
+        console.error(`city ${city} http request failed! (${availableVersions})`, e.message);
     }
 
     // get all mid builds from the patchUrl page
