@@ -2,13 +2,16 @@ version: '3'
 
 services:
   mid-server:
-    #platform: linux/amd64
+    #platform: linux/arm64
     platform: linux/amd64
     #user: 1005120000:1005120000
     build:
       context: ./docker
       args: 
-        URL: https://install.service-now.com/glide/distribution/builds/package/app-signed/mid/2022/01/04/mid.rome-06-23-2021__patch5-12-15-2021_01-04-2022_2221.linux.x86-64.zip
+        #URL: https://install.service-now.com/glide/distribution/builds/package/app-signed/mid/2022/01/04/mid.rome-06-23-2021__patch5-12-15-2021_01-04-2022_2221.linux.x86-64.zip
+        #ARM_VERSION: rome-06-23-2021__patch5-12-15-2021_01-04-2022_2221
+        URL: https://install.service-now.com/glide/distribution/builds/package/mid/2022/04/26/mid.quebec-12-09-2020__patch10-hotfix4-04-01-2022_04-26-2022_1133.linux.x86-64.zip
+        ARM_VERSION: quebec-12-09-2020__patch10-hotfix4-04-01-2022_04-26-2022_1133
     env_file:
       - ./test/.env
     environment:

@@ -94,6 +94,12 @@ then
         sed -i "s|</parameters>|    <parameter name=\"mid.pinned.version\" value=\"${PIN}\"/>\n\n</parameters>|g" /opt/agent/config.xml
     fi
     
+    if [[ -z "$PIN" && `dpkg --print-architecture` == 'arm64' && ! -z "$ARM_VERSION" ]]
+    then
+        echo "DOCKER: ARM Version - Pinning MID Server to version $ARM_VERSION"
+        sed -i "s|</parameters>|    <parameter name=\"mid.pinned.version\" value=\"${ARM_VERSION}\"/>\n\n</parameters>|g" /opt/agent/config.xml
+    fi
+
     if [[ ! -z "$PROXY" ]]
     then
         sed -i "s|</parameters>|    <parameter name=\"mid.proxy.use_proxy\" value=\"true\"/>\n\n</parameters>|g" /opt/agent/config.xml

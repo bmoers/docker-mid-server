@@ -279,7 +279,7 @@ const getNewBuilds = async (city, existingBuilds = []) => {
                             tags.push('moers/mid-server:latest')
                     }
                     //console.log(tags);
-                    await dockerBuild(`docker buildx build --platform linux/amd64,linux/arm64 --push -f ./Dockerfile --no-cache --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
+                    await dockerBuild(`docker buildx build --platform linux/amd64,linux/arm64 --push -f ./Dockerfile --no-cache --build-arg ARM_VERSION=${build.version} --build-arg URL=${build.url} ${tags.map((t) => `--tag ${t}`).join(' ')} . `, tags, city, build);
                     build.done = true;
                     await updateBuild(build);
 
