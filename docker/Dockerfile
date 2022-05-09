@@ -34,17 +34,17 @@ RUN wget --progress=bar:force --no-check-certificate \
     mv /opt/agent/config.xml /opt/. && \
     rm -rf /tmp/*
 
-RUN /bin/bash -c 'if [[ ! -d "/opt/agent/jre" ]] ; then apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository -y ppa:openjdk-r/ppa && \
-    apt-get update && \
-    apt-get install -y openjdk-8-jre && \
+RUN /bin/bash -c 'if [[ ! -d "/opt/agent/jre" || `dpkg --print-architecture` == "arm64" ]] ; then \
+    apt-get -q update && \
+    apt-get install -qy openjdk-11-jre && \
     update-alternatives --config java && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/* && \
-    ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre /opt/agent/. \
+    rm -rf /opt/agent/jre && \
+    rm /usr/lib/jvm/java-11-openjdk-arm64/lib/security/blacklisted.certs  && \
+    cp -R --dereference /usr/lib/jvm/java-11-openjdk-arm64 /opt/agent/jre && \
+    chown -R mid:mid /opt/agent/jre/lib/security \
     ; fi'
 
 # install additional packages
@@ -61,6 +61,9 @@ RUN apt-get -q update && \
 
 # mitigate CVE-2021-44228 Log4j and remove the JndiLookup class from the core jar
 RUN zip -q -d /opt/agent/lib/log4j-core*.jar org/apache/logging/log4j/core/lookup/JndiLookup.class || true
+
+ARG ARM_VERSION
+ENV ARM_VERSION ${ARM_VERSION}
 
 # HEALTHCHECK --interval=15s --retries=6 --timeout=5s --start-period=30s CMD pgrep -af /opt/agent/bin/./wrapper-linux-x86-64 | grep `cat /opt/agent/work/mid.pid` || exit 1 
 
