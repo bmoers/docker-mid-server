@@ -62,6 +62,19 @@ const updateBuild = (build) => {
     });
 }
 
+const setupBuildx = async () => {
+    const commands = [
+        "docker buildx create --name builderName --platform linux/amd64,linux/arm64",
+        "docker buildx use builderName",
+        "docker buildx inspect builderName --bootstrap"
+    ]
+
+    await Promise.mapSeries(commands, async (command) => {
+        console.log(`\t${command}`)
+        await execAsync(command, { cwd: './docker' });
+    });
+}
+
 const dockerBuild = async (command, tags, city, build) => {
 
     console.log(`Building image: ${city}, version: ${build.version}, tags: ${tags}`);
@@ -200,6 +213,9 @@ const getNewBuilds = async (city, existingBuilds = []) => {
 
 (async () => {
     try {
+
+        await setupBuildx();
+
         db = await connect();
         const cities = (await getCities()).sort();
         let existingBuilds = await getBuilds(cities);
